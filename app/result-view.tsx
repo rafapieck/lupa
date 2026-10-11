@@ -8,6 +8,9 @@ const THEME: Record<Verdict, { band: string; circle: string; icon: string; title
   green: { band: "bg-green-500", circle: "bg-green-700", icon: "text-green-700", title: "text-green-800" },
 };
 
+export const SIMULATED_NOTE =
+  "ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual.";
+
 const EMOJI: Record<Verdict, string> = { red: "🔴", yellow: "🟡", green: "🟢" };
 
 export default function ResultView({
@@ -23,12 +26,6 @@ export default function ResultView({
 
   return (
     <div className="flex flex-1 flex-col">
-      {result.simulated && (
-        <p role="status" className="bg-amber-100 px-4 py-2 text-center text-base font-semibold text-amber-900">
-          ⚠️ Resultado simulado (IA no disponible)
-        </p>
-      )}
-
       <section className={`${theme.band} px-5 pt-6 pb-14`} aria-live="polite">
         <div
           className={`${theme.circle} mx-auto flex size-44 flex-col items-center justify-center rounded-full text-center text-white shadow-lg`}
@@ -66,6 +63,15 @@ export default function ResultView({
           <h3 className="text-lg font-semibold text-gray-900">Qué hacer ahora</h3>
           <p className="mt-1 text-xl leading-snug font-bold text-gray-900">{result.nextStep}</p>
         </section>
+
+        {result.simulated && (
+          // Required label for simulated AI output. Kept small and below the
+          // advice: the verdict itself always comes from the rules, so it must
+          // not read as "fake result" (persona test, confusion #1).
+          <p role="status" className="px-1 text-sm leading-snug text-gray-500">
+            {SIMULATED_NOTE}
+          </p>
+        )}
 
         <button
           type="button"

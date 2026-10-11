@@ -26,7 +26,7 @@ Phone browser → Next.js page (paste box + result)
 
 The AI only reads the offer and fills in yes/no signals. **The verdict comes from fixed rules and the verified patterns**, not from the AI. A score of 0–2 is green, 3–5 is yellow, and 6 or more is red.
 
-If `GEMINI_API_KEY` is missing or Gemini fails (for example when the free quota runs out), Lupa uses a keyword-based extraction instead. The result screen then shows **"⚠️ Resultado simulado (IA no disponible)"**.
+If `GEMINI_API_KEY` is missing or Gemini fails (for example when the free quota runs out), Lupa uses a keyword-based extraction instead. The verdict still comes from the same rules. Below "Qué hacer ahora", the result screen shows a small note: **"ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual."**
 
 ## Run locally
 
@@ -68,7 +68,7 @@ Never commit real values. `.env*` is git-ignored, except `.env.example`.
 
 1. Import `rafapieck/lupa` in Vercel. It detects Next.js automatically.
 2. Under **Settings → Environment Variables**, add `GEMINI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-3. Deploy. Test with **"Probar con un ejemplo"**. It should come back 🔴, *without* the simulated banner.
+3. Deploy. Test with **"Probar con un ejemplo"**. It should come back 🔴, *without* the "análisis de IA simulado" note.
 
 ## Test offers
 
