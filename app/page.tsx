@@ -1,0 +1,9 @@
+import CheckForm from "./check-form";
+
+export default function Home() {
+  return (
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pt-10 pb-6">
+      <CheckForm />
+    </main>
+  );
+}
