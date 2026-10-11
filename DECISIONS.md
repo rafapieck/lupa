@@ -35,5 +35,19 @@ Each pattern cites the Mexican authority whose public alerts describe it (Polic�
 
 **Check after deploy:** "Probar con un ejemplo" should come back 🔴 with no simulated banner. If the banner is still there, the new log line says why.
 
+## Persona test fix — simulated label wording and placement
+
+The Layer 1 persona test is in [docs/PERSONA_TEST.md](docs/PERSONA_TEST.md). Karla did not pay. The worst confusion was the top banner "⚠️ Resultado simulado (IA no disponible)". She read "simulado" as "fake result" and almost ignored the whole warning. That's wrong: the verdict always comes from the rules and the verified patterns, and only the AI *reading* of the offer was simulated.
+- **Note moved:** it now sits below "Qué hacer ahora", in small grey text, with no yellow banner. It says: "ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual." It still shows every time `simulated: true` (the course rule that simulated AI output is labeled), and a test enforces both its presence and its position.
+- **Footer reworded:** "No guardamos lo que pegas." became "Lo analiza una IA de Google. Lupa no guarda lo que pegas." This is honest about where the text goes (persona confusion #7, and the free-tier note above).
+
+## Bug #2 — Supabase URL env var was malformed in Vercel
+
+The `NEXT_PUBLIC_SUPABASE_URL` value in Vercel was malformed. With a bad URL the Supabase read fails, and `lib/load-patterns.ts` falls back to the local copy in `lib/patterns.ts`. Users still get correct results, but the database isn't being used. Fixed by re-adding the `NEXT_PUBLIC_` vars as the Config type in Vercel. Next.js bakes `NEXT_PUBLIC_*` values in at build time, so a change needs a redeploy.
+
+## Observation — Gemini 503 overloaded once
+
+Gemini once answered 503 (model overloaded). The fallback handled it: the user got a verdict from the rules, with the simulated note. No code change.
+
 ## Tomorrow's first move
 Deploy to Vercel with the real `GEMINI_API_KEY` and Supabase keys, and run the 5 PACKET test offers plus the prompt-injection offer against the **live** Gemini path (only the simulated path and a mocked Gemini have been tested so far). Then run the Karla persona test (PACKET §10.D) on the result screen and fix the worst hesitation.

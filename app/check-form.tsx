@@ -8,6 +8,8 @@ import ResultView, { type CheckResult } from "./result-view";
 const EXAMPLE_OFFER =
   "Vacante en tienda, $35,000 al mes, sin experiencia, contratación HOY. Solo deposita $450 para tu uniforme.";
 
+export const FOOTER_NOTE = "Lo analiza una IA de Google. Lupa no guarda lo que pegas.";
+
 const NETWORK_ERROR = "No pudimos revisar la oferta. Revisa tu conexión e intenta de nuevo.";
 
 export default function CheckForm() {
@@ -114,7 +116,7 @@ export default function CheckForm() {
         </button>
       </form>
 
-      <footer className="mt-auto pt-8 text-center text-base text-gray-600">No guardamos lo que pegas.</footer>
+      <footer className="mt-auto pt-8 text-center text-base text-gray-600">{FOOTER_NOTE}</footer>
     </div>
   );
 }
