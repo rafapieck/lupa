@@ -3,6 +3,9 @@ import { loadPatterns } from "@/lib/load-patterns";
 import { scoreSignals } from "@/lib/score";
 import { validateOffer } from "@/lib/validate";
 
+// Gemini may take up to GEMINI_TIMEOUT_MS (20 s); give Vercel room to finish.
+export const maxDuration = 30;
+
 // Raw body cap before parsing (3000 chars of text plus HTML/JSON overhead).
 const MAX_BODY_BYTES = 20_000;
 

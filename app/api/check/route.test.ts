@@ -1,4 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const generateContent = vi.fn();
+vi.mock("@google/genai", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@google/genai")>()),
+  GoogleGenAI: class {
+    models = { generateContent };
+  },
+}));
 import { INJECTION, OFFER_1, OFFER_4, OFFER_5 } from "@/lib/fixtures/offers";
 import { POST } from "./route";
 
@@ -58,5 +66,31 @@ describe("POST /api/check (no keys → simulated, local patterns)", () => {
     for (const spy of spies) {
       for (const args of spy.mock.calls) expect(args.join(" ")).not.toContain("uniforme");
     }
+  });
+});
+
+describe("POST /api/check (Gemini key set but the call fails)", () => {
+  beforeEach(() => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it("returns a simulated result instead of an error", async () => {
+    generateContent.mockRejectedValue(new DOMException("This operation was aborted", "AbortError"));
+    const res = await post({ text: OFFER_1 });
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.simulated).toBe(true);
+    expect(json.verdict).toBe("red");
+  });
+
+  it("exports maxDuration = 30 so Vercel does not cut Gemini off first", async () => {
+    expect((await import("./route")).maxDuration).toBe(30);
   });
 });
