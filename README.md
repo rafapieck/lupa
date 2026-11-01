@@ -56,7 +56,7 @@ With no env vars set, the app still works: it uses simulated extraction and the 
 | `GEMINI_API_KEY` | for real AI | Google AI Studio API key (free tier). Server-only. |
 | `NEXT_PUBLIC_SUPABASE_URL` | for DB patterns, saved checks and the counter | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | for DB patterns, saved checks and the counter | Supabase anon (public) key. Safe to expose because RLS only allows reading `fraud_patterns`, inserting into `checks` (no reads, updates or deletes) and calling `checks_this_week()`, which returns one number. |
-| `GEMINI_MODEL` | no | Overrides the model. Default: `gemini-flash-latest` |
+| `GEMINI_MODEL` | recommended in production | Overrides the Gemini model. Code default: `gemini-flash-latest`. **Production uses `gemini-flash-lite-latest`**: in production, `gemini-flash-latest` returned 503 "high demand" and `gemini-2.5-flash` returned 404 for new users (see DECISIONS.md, Bug #4). Any value works as long as the model is available on the free tier. Server-only. |
 
 Never commit real values. `.env*` is git-ignored, except `.env.example`.
 
@@ -75,7 +75,7 @@ Never commit real values. `.env*` is git-ignored, except `.env.example`.
 ## Deploy (Vercel)
 
 1. Import `rafapieck/lupa` in Vercel. It detects Next.js automatically.
-2. Under **Settings → Environment Variables**, add `GEMINI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+2. Under **Settings → Environment Variables**, add `GEMINI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `GEMINI_MODEL=gemini-flash-lite-latest`. Changing an env var only takes effect after a redeploy.
 3. Deploy. Test with **"Probar con un ejemplo"**. It should come back 🔴, *without* the "análisis de IA simulado" note.
 4. Check that the check was saved: in Supabase, **Table Editor** → `checks` has a new row, and `/about` shows "Revisiones esta semana" one higher.
 

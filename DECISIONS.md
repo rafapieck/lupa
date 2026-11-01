@@ -82,3 +82,22 @@ Deploy to Vercel with the real `GEMINI_API_KEY` and Supabase keys, and run the 5
 
 ### Tomorrow's first move
 Run `supabase/checks.sql` in the Supabase SQL editor (after `seed.sql`). Check that the production deploy at `lupaempleo.me` saves a row per check and that the `/about` number goes up by one. Then run the PACKET §12 mechanical pass and the Jorge persona test.
+
+## Bug #4 — Gemini calls failed in production (timeout, 503, 404)
+
+**Symptom:** In production every result fell back to the simulated extraction and showed the "análisis de IA simulado" note. Verdicts were still correct, because they come from the rules, but the AI wasn't reading the offers.
+
+**What we saw, in order:**
+1. `AbortError`: the Gemini call hit our timeout.
+2. `503` "high demand" from `gemini-flash-latest`: the model was overloaded.
+3. Trying `gemini-2.5-flash` directly returned `404` "no longer available to new users", so it isn't an option either.
+
+**Cause:** The default `gemini-flash-latest` alias was overloaded on the free tier, and the older pinned Flash model is closed to new projects. The fallback did its job (no broken answers), but the AI path was effectively off.
+
+**Fix (configuration, no code change):** We set the Vercel env var `GEMINI_MODEL=gemini-flash-lite-latest` and redeployed. `lib/extract.ts` already reads `GEMINI_MODEL`, and its thinking-level fallback (MINIMAL → LOW → model default) handles whatever the Lite model accepts.
+
+**Verified live:** AI extraction works again and the simulated note no longer appears. The AI also caught an extra signal that the keyword fallback misses (vague job description / pay). That's the reason to keep the AI as the reader: the keyword rules only cover the clear signals.
+
+**Notes:**
+- The code default is still `gemini-flash-latest`, so a deploy without `GEMINI_MODEL` would hit the same 503s. Backlog: change `DEFAULT_GEMINI_MODEL` to `gemini-flash-lite-latest` (one-line change plus a test) after a few days of stable production on Lite.
+- `*-latest` aliases can move to a new model without warning. If results start coming back simulated again, check the Vercel logs for the status code first, then try another free-tier model through `GEMINI_MODEL` before touching code.
