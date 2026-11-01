@@ -1,10 +1,10 @@
 # Lupa 🔍
 
-**¿Esta oferta de trabajo es real?**
+**¿Esta oferta de trabajo tiene señales de fraude?**
 
 Lupa is a mobile-first web app that checks whether a job offer looks like a scam. It's built for job seekers in Mexico who find offers in Facebook groups and WhatsApp. You paste the offer text and get, in a few seconds:
 
-- a verdict: 🟢 **Riesgo bajo** / 🟡 **Precaución** / 🔴 **Riesgo alto**
+- a verdict: 🟢 **No encontramos señales conocidas** / 🟡 **Precaución** / 🔴 **Riesgo alto**
 - the red flags found, each one tied to a verified fraud pattern and its source (Policía Cibernética CDMX, SSC CDMX, Guardia Nacional)
 - one concrete next step ("No pagues nada…")
 

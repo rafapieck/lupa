@@ -63,7 +63,7 @@ export default function CheckForm() {
     <div className="flex flex-1 flex-col px-5 pt-6 pb-2">
       <header className="text-center">
         <h1 className="text-4xl font-bold tracking-tight">Lupa 🔍</h1>
-        <p className="mt-3 text-xl text-gray-700">¿Esta oferta de trabajo es real?</p>
+        <p className="mt-3 text-xl text-gray-700">¿Esta oferta de trabajo tiene señales de fraude?</p>
       </header>
 
       <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit} noValidate>

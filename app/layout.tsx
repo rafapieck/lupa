@@ -4,7 +4,7 @@ import SiteFooter from "./site-footer";
 import SiteHeader from "./site-header";
 
 export const metadata: Metadata = {
-  title: "Lupa 🔍 — ¿Esta oferta de trabajo es real?",
+  title: "Lupa 🔍 — Revisa si una oferta de trabajo tiene señales de fraude",
   description:
     "Pega una oferta de trabajo y Lupa te dice si tiene señales de fraude.",
 };

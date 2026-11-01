@@ -11,6 +11,11 @@ const THEME: Record<Verdict, { band: string; circle: string; icon: string; title
 export const SIMULATED_NOTE =
   "ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual.";
 
+// A green verdict can still carry low-weight matches (score 1–2). Calling them
+// "señales de alerta encontradas" under "No encontramos señales conocidas"
+// contradicted the label, so on green they are shown as minor details.
+export const GREEN_DETAILS_TITLE = "Detalles menores a revisar";
+
 const EMOJI: Record<Verdict, string> = { red: "🔴", yellow: "🟡", green: "🟢" };
 
 export default function ResultView({
@@ -30,7 +35,11 @@ export default function ResultView({
         <div
           className={`${theme.circle} mx-auto flex size-44 flex-col items-center justify-center rounded-full text-center text-white shadow-lg`}
         >
-          <h2 className="px-2 text-[1.8rem] leading-tight font-bold">
+          <h2
+            className={`px-3 leading-tight font-bold ${
+              result.verdictLabel.length > 14 ? "text-xl" : "text-[1.8rem]"
+            }`}
+          >
             <span className="sr-only">{EMOJI[result.verdict]} </span>
             {result.verdictLabel}
           </h2>
@@ -39,7 +48,9 @@ export default function ResultView({
 
       <div className="-mt-10 flex flex-col gap-4 px-5 pb-6">
         <section className="rounded-2xl bg-white p-5 shadow-md ring-1 ring-black/5">
-          <h3 className={`text-xl font-bold ${theme.title}`}>Señales de alerta encontradas</h3>
+          <h3 className={`text-xl font-bold ${theme.title}`}>
+            {result.verdict === "green" ? GREEN_DETAILS_TITLE : "Señales de alerta encontradas"}
+          </h3>
           {result.matches.length === 0 ? (
             <p className="mt-3 text-lg text-gray-800">No encontramos señales de alerta.</p>
           ) : (
