@@ -7,6 +7,7 @@ Lupa is a mobile-first web app that checks whether a job offer looks like a scam
 - a verdict: 🟢 **No encontramos señales conocidas** / 🟡 **Precaución** / 🔴 **Riesgo alto**
 - the red flags found, each one tied to a verified fraud pattern and its source (Policía Cibernética CDMX, SSC CDMX, Guardia Nacional)
 - one concrete next step ("No pagues nada…")
+- on 🟡/🔴, a polite reply to send the recruiter, with a **Copiar mensaje** button. It's a fixed template from `fraud_patterns.reply_es`, never written by the AI
 
 Lupa does **not** store or log what you paste. After each verdict it saves one anonymous `checks` row (verdict, score, matched pattern IDs, simulated flag, date). There's no offer text, no IP, no user agent and nothing about the user.
 
@@ -68,9 +69,10 @@ Never commit real values. `.env*` is git-ignored, except `.env.example`.
 4. Check it: **Table Editor** → `fraud_patterns` should have 11 rows.
 5. Open a new query, paste [`supabase/checks.sql`](supabase/checks.sql), and click **Run**. This creates the `checks` table (verdict, score, matched pattern IDs, simulated flag and date; **no offer text, no user data**), turns RLS on with one policy (`anon` can only `INSERT`), adds a trigger that rejects pattern IDs not in `fraud_patterns`, and creates `checks_this_week()`, the North Star counter. It's idempotent: running it again changes nothing and gives no errors. Run it after `seed.sql`.
 6. Check it: in a new query, run `select public.checks_this_week();`. It should return `0` (or the number of checks so far).
-7. Go to **Project Settings → API** and copy the Project URL and the `anon` public key into the env vars.
+7. **Projects created before the reply feature:** open a new query, paste [`supabase/reply.sql`](supabase/reply.sql), and click **Run**. It adds the nullable `reply_es` column to `fraud_patterns` and fills in the reply templates. It's safe to re-run. New projects already get the column from `schema.sql` and the replies from `seed.sql`, and running `reply.sql` there changes nothing. Check: `select id, reply_es from public.fraud_patterns;` shows 11 replies.
+8. Go to **Project Settings → API** and copy the Project URL and the `anon` public key into the env vars.
 
-`lib/patterns.ts` holds the same patterns as a local fallback. If you change one, change the other: `lib/patterns.test.ts` fails when they get out of sync.
+`lib/patterns.ts` holds the same patterns (including `reply_es`) as a local fallback. Until `reply.sql` runs, the Supabase read fails on the missing column and Lupa uses this local copy, so results stay correct. If you change one, change the other: `lib/patterns.test.ts` fails when they get out of sync.
 
 ## Deploy (Vercel)
 
