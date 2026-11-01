@@ -13,7 +13,8 @@ function isPattern(row: unknown): row is FraudPattern {
     typeof r.weight === "number" &&
     typeof r.label_es === "string" &&
     typeof r.next_step_es === "string" &&
-    typeof r.source === "string"
+    typeof r.source === "string" &&
+    (r.reply_es == null || typeof r.reply_es === "string")
   );
 }
 
@@ -31,10 +32,12 @@ export async function loadPatterns(): Promise<LoadedPatterns> {
     const supabase = createClient(url, key, { auth: { persistSession: false } });
     const { data, error } = await supabase
       .from("fraud_patterns")
-      .select("id, signal, weight, label_es, next_step_es, source")
+      .select("id, signal, weight, label_es, next_step_es, source, reply_es")
       .abortSignal(AbortSignal.timeout(5000));
     if (error) throw error;
-    const patterns = (data ?? []).filter(isPattern);
+    const patterns = (data ?? [])
+      .filter(isPattern)
+      .map((p) => ({ ...p, reply_es: p.reply_es?.trim() || null }));
     if (patterns.length === 0) throw new Error("fraud_patterns is empty");
     cache = { patterns, at: Date.now() };
     return { patterns, from: "supabase" };
