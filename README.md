@@ -11,7 +11,7 @@ Lupa is a mobile-first web app that checks whether a job offer looks like a scam
 
 Lupa does **not** store or log what you paste. After each verdict it saves one anonymous `checks` row (verdict, score, matched pattern IDs, simulated flag, date). There's no offer text, no IP, no user agent and nothing about the user.
 
-Live at **[lupaempleo.me](https://lupaempleo.me)**. Pages: `/` (checker), `/product` (Cómo funciona), `/about` (Nosotros, with the live "Revisiones esta semana" number).
+Live at **[lupaempleo.xyz](https://www.lupaempleo.xyz)**. Pages: `/` (checker), `/product` (Cómo funciona), `/about` (Nosotros, with the live "Revisiones esta semana" number).
 
 ## How it works
 
@@ -83,14 +83,14 @@ Never commit real values. `.env*` is git-ignored, except `.env.example`.
 
 Vercel bakes `NEXT_PUBLIC_*` values in at build time, so redeploy after changing them.
 
-## Domain (`lupaempleo.me`)
+## Domain (`lupaempleo.xyz`)
 
-The domain comes from the GitHub Student Pack (Namecheap).
+The domain was bought on Porkbun (about US$2 for the first year). `www.lupaempleo.xyz` is the primary domain, and the apex `lupaempleo.xyz` redirects to it.
 
-1. In Vercel, open the project → **Settings → Domains** and add `lupaempleo.me` (and `www.lupaempleo.me`, redirected to the apex).
-2. Vercel shows the DNS records it needs. In Namecheap → **Domain List → Manage → Advanced DNS**, add them: usually an `A` record for `@` pointing to Vercel's IP and a `CNAME` for `www` pointing to `cname.vercel-dns.com`. Use the exact values Vercel shows.
-3. Wait until Vercel marks the domain **Valid Configuration**; HTTPS is issued automatically.
-4. Open `https://lupaempleo.me`, `/product` and `/about` on a phone.
+1. In Vercel, open the project → **Settings → Domains** and add `www.lupaempleo.xyz` and `lupaempleo.xyz`. Set `www` as primary and have the apex redirect to it.
+2. Vercel shows the DNS records it needs. In Porkbun → **Domain Management → DNS**, add them: usually an `A` record for the apex pointing to Vercel's IP and a `CNAME` for `www` pointing to Vercel's target. Use the exact values Vercel shows. Remove Porkbun's default parking records if they conflict.
+3. Wait until Vercel marks both domains **Valid Configuration**. HTTPS is issued automatically.
+4. Open `https://www.lupaempleo.xyz`, `/product` and `/about` on a phone, and check that `https://lupaempleo.xyz` redirects to `www`.
 
 ## Test offers
 

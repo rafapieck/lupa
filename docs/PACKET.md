@@ -22,7 +22,7 @@ The two personas in `docs/PERSONAS.md`:
 
 ## 3. Success definition
 
-> **Before the module closes**, at the venture's real domain (`lupaempleo.me`):
+> **Before the module closes**, at the venture's real domain (`lupaempleo.xyz`):
 > 1. A visitor pastes a job offer on the home page and, in under 30 seconds, gets a 🟢/🟡/🔴 verdict, each red flag with its official source, and one next step. **The AI only extracts signals; the verdict comes from the verified `fraud_patterns` table and fixed rules.**
 > 2. Every completed check is **saved** as a `check` row (matched pattern IDs, verdict, score, date), with **no offer text and no user data**.
 > 3. The site has `/product` (how it works) and `/about` (the need, who pays, the 10:1 case), plus a public "checks this week" number, which is the North Star.
@@ -123,7 +123,7 @@ If this core works, Lupa becomes the trust layer of informal job searching in Me
 | Layer | Tool | Notes |
 |---|---|---|
 | Site | Next.js (App Router) + Tailwind | `/` checker · `/product` · `/about` |
-| Hosting + domain | Vercel + `lupaempleo.me` (GitHub Student Pack via Namecheap) | Real domain is the URL of record |
+| Hosting + domain | Vercel + lupaempleo.xyz (Porkbun, ~US$2 first year) | Real domain is the URL of record |
 | AI | Google Gemini Flash (free tier) | Extracts signals only; keyword fallback labeled on screen |
 | Verified data | Supabase `fraud_patterns` | RLS ON, public read-only |
 | Saved checks | Supabase `checks` | RLS ON, **insert-only** for the server; no public read |

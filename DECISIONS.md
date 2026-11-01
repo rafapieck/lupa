@@ -81,7 +81,7 @@ Deploy to Vercel with the real `GEMINI_API_KEY` and Supabase keys, and run the 5
 - Guardrail metric (share of 🔴/🟡) as a second SQL function. The data is already in `checks`.
 
 ### Tomorrow's first move
-Run `supabase/checks.sql` in the Supabase SQL editor (after `seed.sql`). Check that the production deploy at `lupaempleo.me` saves a row per check and that the `/about` number goes up by one. Then run the PACKET §12 mechanical pass and the Jorge persona test.
+Run `supabase/checks.sql` in the Supabase SQL editor (after `seed.sql`). Check that the production deploy at `lupaempleo.xyz` saves a row per check and that the `/about` number goes up by one. Then run the PACKET §12 mechanical pass and the Jorge persona test.
 
 ## Bug #4 — Gemini calls failed in production (timeout, 503, 404)
 
@@ -125,4 +125,11 @@ Synthetic persona test, **Jorge** (27, Iztapalapa, synthetic). The worst confusi
 - **The company name may be in the chat but not in the pasted text.** `no_company_name` then fires unfairly. Consider a hint ("pega también el nombre de la empresa si te lo dieron") or lower the weight. Needs real-user data first.
 
 ### Tomorrow's first move
-Run `supabase/reply.sql` in Supabase. Deploy, paste Jorge's Monterrey offer at `lupaempleo.me`, and confirm the 🔴 shows the INE reply and "Copiar mensaje" works on a real Android phone. Then rerun the Jorge persona test on the new screen.
+Run `supabase/reply.sql` in Supabase. Deploy, paste Jorge's Monterrey offer at `lupaempleo.xyz`, and confirm the 🔴 shows the INE reply and "Copiar mensaje" works on a real Android phone. Then rerun the Jorge persona test on the new screen.
+
+## 2026-11-01 — Domain: lupaempleo.xyz instead of lupaempleo.me
+
+The plan (PACKET §11) was the free `.me` domain from the GitHub Student Pack (Namecheap). It wasn't available before today's deadline: after the Student Pack approval, the benefit takes about 72 hours to unlock. So we bought **`lupaempleo.xyz` on Porkbun** (about US$2 for the first year) and connected it in Vercel. **`www.lupaempleo.xyz` is primary**, and the apex `lupaempleo.xyz` redirects to it. The `.xyz` domain is now the URL of record in the PACKET, README and this file.
+
+- **Free stack:** this is the only paid item, and it's a one-time few dollars. Check the renewal price before next year, and decide then whether to keep `.xyz` or move to the Student Pack domain.
+- **Backlog:** if we later switch domains, add a redirect from the old one so shared links keep working.
