@@ -94,3 +94,26 @@ describe("scoreSignals — details", () => {
     expect(scoreSignals({ no_company_name: true }, patterns).verdict).toBe("red");
   });
 });
+
+describe("reply template (persona test, Jorge)", () => {
+  it("red with a documents request → the documents reply", () => {
+    const r = scoreSignals({ asks_for_personal_documents: true, travel_or_housing_bait: true });
+    expect(r.verdict).toBe("red");
+    expect(r.reply).toBe(
+      "Con gusto. ¿Me pasa el nombre y la dirección de la empresa? Mi INE la llevo en persona el día que me presente.",
+    );
+  });
+
+  it("uses the highest-weight matched pattern that has a reply", () => {
+    const patterns = LOCAL_PATTERNS.map((p) => (p.id === "personal_documents" ? { ...p, reply_es: null } : p));
+    const r = scoreSignals({ asks_for_personal_documents: true, travel_or_housing_bait: true }, patterns);
+    expect(r.reply).toMatch(/teléfono fijo de la oficina/);
+  });
+
+  it("is null on green and when no matched pattern has a reply", () => {
+    expect(scoreSignals({ no_company_name: true }).reply).toBeNull();
+    expect(scoreSignals({}).reply).toBeNull();
+    const noReplies = LOCAL_PATTERNS.map((p) => ({ ...p, reply_es: null }));
+    expect(scoreSignals({ asks_for_payment: true, immediate_hiring: true }, noReplies).reply).toBeNull();
+  });
+});

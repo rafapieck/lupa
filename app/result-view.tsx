@@ -1,4 +1,5 @@
 import type { ScoreResult, Verdict } from "@/lib/score";
+import CopyReply from "./copy-reply";
 
 export type CheckResult = ScoreResult & { simulated: boolean };
 
@@ -74,6 +75,10 @@ export default function ResultView({
           <h3 className="text-lg font-semibold text-gray-900">Qué hacer ahora</h3>
           <p className="mt-1 text-xl leading-snug font-bold text-gray-900">{result.nextStep}</p>
         </section>
+
+        {/* Persona test (Jorge): after a red verdict he didn't know what to answer
+            the recruiter. Fixed template from the rules; never on green. */}
+        {result.verdict !== "green" && result.reply && <CopyReply reply={result.reply} />}
 
         {result.simulated && (
           // Required label for simulated AI output. Kept small and below the

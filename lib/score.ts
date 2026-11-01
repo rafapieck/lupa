@@ -10,6 +10,7 @@ export type MatchedFlag = {
   label: string;
   nextStep: string;
   source: string;
+  reply: string | null;
 };
 
 export type ScoreResult = {
@@ -18,6 +19,11 @@ export type ScoreResult = {
   verdictLabel: string;
   matches: MatchedFlag[];
   nextStep: string;
+  /**
+   * Fixed reply template from the highest-weight matched pattern that has one.
+   * Only on yellow/red; always null on green. Never written by the AI.
+   */
+  reply: string | null;
 };
 
 export const VERDICT_LABELS: Record<Verdict, string> = {
@@ -58,6 +64,7 @@ export function scoreSignals(
       label: p.label_es,
       nextStep: p.next_step_es,
       source: p.source,
+      reply: p.reply_es ?? null,
     }))
     .sort((a, b) => b.weight - a.weight);
 
@@ -70,5 +77,6 @@ export function scoreSignals(
     verdictLabel: VERDICT_LABELS[verdict],
     matches,
     nextStep: verdict === "green" || matches.length === 0 ? DEFAULT_SAFE_TIP : matches[0].nextStep,
+    reply: verdict === "green" ? null : (matches.find((m) => m.reply)?.reply ?? null),
   };
 }

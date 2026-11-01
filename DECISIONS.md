@@ -101,3 +101,28 @@ Run `supabase/checks.sql` in the Supabase SQL editor (after `seed.sql`). Check t
 **Notes:**
 - The code default is still `gemini-flash-latest`, so a deploy without `GEMINI_MODEL` would hit the same 503s. Backlog: change `DEFAULT_GEMINI_MODEL` to `gemini-flash-lite-latest` (one-line change plus a test) after a few days of stable production on Lite.
 - `*-latest` aliases can move to a new model without warning. If results start coming back simulated again, check the Vercel logs for the status code first, then try another free-tier model through `GEMINI_MODEL` before touching code.
+
+## 2026-11-01 — Persona test (Jorge) and the reply-to-recruiter fix
+
+### Finding
+Synthetic persona test, **Jorge** (27, Iztapalapa, synthetic). The worst confusion: after a 🔴 verdict he didn't know what to answer the recruiter. Under pressure at 11 pm, *"a lo mejor igual mando la INE"* ("maybe I'd still send the INE"). The verdict was right, but it left him alone at the exact moment the scammer pushes. A warning that doesn't turn into an action loses to the recruiter's pressure.
+
+### Fix (one feature, per the Charter)
+- **`fraud_patterns.reply_es`** (nullable): a short, polite, fixed reply template for each pattern. It asks the employer to prove itself (company name, address, RFC, office phone, in-person or video interview). It never accuses anyone and never sends documents or money. The column is added by `supabase/reply.sql` (idempotent) and is also in `schema.sql`, `seed.sql` and `LOCAL_PATTERNS`. `lib/patterns.test.ts` keeps all four in sync.
+- **The rules choose the reply, not the AI.** `lib/score.ts` takes the reply from the highest-weight matched pattern that has one, the same order as "Qué hacer ahora". It's only shown on 🟡/🔴; on 🟢 it's always `null`. The AI never writes or edits a reply (Method: the AI reads; verified rules decide).
+- **Result screen:** under "Qué hacer ahora", a box titled "Si quieres contestarle, copia esto:" shows the reply and a big **Copiar mensaje** button. The button uses the Clipboard API, falls back to `execCommand` for older Android browsers, and shows "¡Copiado!" for 2.5 s. If copying fails, it says to long-press the text, which is selectable.
+- **Tests:** the documents reply shows on red, below "Qué hacer ahora"; the box is hidden on green; the button copies the exact text and shows "¡Copiado!"; the fallback works; a failure shows the manual-copy hint. Content tests: every reply is a question of 160 characters or fewer, contains no accusing words, and never offers documents or money. `jsdom` was added as a dev dependency for the click test.
+- **Deploy order:** if the code ships before `reply.sql` runs, the Supabase read fails on the missing column and falls back to the local patterns, which already have the replies. Users never see a broken result.
+
+### Backlog (other persona findings, not built: one fix per round)
+- **Image or flyer offers:** many offers arrive as an image, which can't be pasted. Already in the 3-year vision (screenshot reading); out of scope for Weeks 12–17 unless the Charter changes.
+- **The word "fraude" feels judgmental** (headline "¿Esta oferta de trabajo tiene señales de fraude?"). Try softer wording that still never says "segura"/"real".
+- **A counter showing "5" lowers trust** on `/about`. Consider hiding it below a threshold, or framing it differently while numbers are small.
+- **The "Lupa no guarda lo que pegas" note should sit next to the textbox**, where the worry happens, not only in the footer.
+- **"decides por corazonada" and "prevención del delito" feel judgmental** on `/about`. Reword without treating the reader as naive (Jorge quits when treated as naive).
+- **"primer trabajo" excludes experienced workers** (`/about`). Jorge has worked for years; say "quien busca trabajo".
+- **The "sueldo muy alto" / "sin experiencia" flag misfires for experienced guards.** `unrealistic_pay` labels pay as too high "para un trabajo sin experiencia", but a guard's offer can be fair for someone with experience. Review the label and the signal description.
+- **The company name may be in the chat but not in the pasted text.** `no_company_name` then fires unfairly. Consider a hint ("pega también el nombre de la empresa si te lo dieron") or lower the weight. Needs real-user data first.
+
+### Tomorrow's first move
+Run `supabase/reply.sql` in Supabase. Deploy, paste Jorge's Monterrey offer at `lupaempleo.me`, and confirm the 🔴 shows the INE reply and "Copiar mensaje" works on a real Android phone. Then rerun the Jorge persona test on the new screen.

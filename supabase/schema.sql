@@ -7,7 +7,8 @@ create table if not exists public.fraud_patterns (
   weight       int  not null check (weight between 0 and 10),
   label_es     text not null,
   next_step_es text not null,
-  source       text not null
+  source       text not null,
+  reply_es     text  -- fixed reply template (see reply.sql); null = none
 );
 
 -- Row Level Security ON: with no other policies, nobody can insert,
