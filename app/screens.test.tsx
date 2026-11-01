@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { scoreSignals } from "@/lib/score";
-import CheckForm, { FOOTER_NOTE } from "./check-form";
+import CheckForm from "./check-form";
+import SiteFooter, { FOOTER_NOTE } from "./site-footer";
 import ResultView, { SIMULATED_NOTE, type CheckResult } from "./result-view";
 
 const red = scoreSignals({ asks_for_payment: true, unrealistic_pay: true, immediate_hiring: true });
@@ -39,8 +40,11 @@ describe("result screen — simulated note (persona test, confusion #1)", () => 
 describe("home screen footer (persona test, confusion #7)", () => {
   it("says a Google AI reads the text and Lupa does not store it", () => {
     expect(FOOTER_NOTE).toBe("Lo analiza una IA de Google. Lupa no guarda lo que pegas.");
-    const html = renderToStaticMarkup(<CheckForm />);
+    const html = renderToStaticMarkup(<SiteFooter />);
     expect(html).toContain(FOOTER_NOTE);
+    expect(html).toContain("Lupa no guarda lo que pegas.");
+    // The footer now lives in the shared layout; the form must not repeat it.
+    expect(renderToStaticMarkup(<CheckForm />)).not.toContain(FOOTER_NOTE);
     expect(html).not.toContain("No guardamos lo que pegas.");
   });
 });
