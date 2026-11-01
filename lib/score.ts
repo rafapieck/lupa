@@ -21,13 +21,15 @@ export type ScoreResult = {
 };
 
 export const VERDICT_LABELS: Record<Verdict, string> = {
-  green: "Riesgo bajo",
+  green: "No encontramos señales conocidas",
   yellow: "Precaución",
   red: "Riesgo alto",
 };
 
+// Green never means "safe" (Charter principle 3): it only means none of the
+// known patterns matched, so the tip always tells the user to keep checking.
 export const DEFAULT_SAFE_TIP =
-  "Se ve normal, pero antes de ir confirma que la empresa existe y la dirección es real. Nunca pagues ni mandes tu INE antes de una entrevista en persona.";
+  "Eso no garantiza que no sea fraude. Antes de ir, confirma que la empresa existe y que la dirección corresponde a ella. Nunca pagues ni mandes tu INE antes de una entrevista en persona.";
 
 export function emptySignals(): Signals {
   return Object.fromEntries(SIGNALS.map((s) => [s, false])) as Signals;

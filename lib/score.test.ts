@@ -50,7 +50,7 @@ describe("scoreSignals — PACKET test offers", () => {
   it("offer 4 → green with default safe tip", () => {
     const r = scoreSignals(OFFERS.offer4);
     expect(r.verdict).toBe("green");
-    expect(r.verdictLabel).toBe("Riesgo bajo");
+    expect(r.verdictLabel).toBe("No encontramos señales conocidas");
     expect(r.matches).toEqual([]);
     expect(r.nextStep).toBe(DEFAULT_SAFE_TIP);
   });

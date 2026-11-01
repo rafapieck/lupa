@@ -49,5 +49,36 @@ The `NEXT_PUBLIC_SUPABASE_URL` value in Vercel was malformed. With a bad URL the
 
 Gemini once answered 503 (model overloaded). The fallback handled it: the user got a verdict from the rules, with the simulated note. No code change.
 
-## Tomorrow's first move
+## Tomorrow's first move (Week 9, done)
 Deploy to Vercel with the real `GEMINI_API_KEY` and Supabase keys, and run the 5 PACKET test offers plus the prompt-injection offer against the **live** Gemini path (only the simulated path and a mocked Gemini have been tested so far). Then run the Karla persona test (PACKET §10.D) on the result screen and fix the worst hesitation.
+
+## 2026-11-01 — Week 12 core build
+
+### What was built
+- **F1: `checks` table + North Star** (`supabase/checks.sql`). Columns: `id`, `created_at`, `verdict` (`green`/`yellow`/`red`), `score` (0–100), `pattern_ids`, `simulated`. No text column. RLS is on with one policy: `anon` can insert. There are no select, update or delete policies. A `before insert` trigger rejects any pattern ID that isn't in `fraud_patterns`. `checks_this_week()` is `security definer` and returns one number, never rows. The file was run twice against a local Postgres 16 with Supabase-style roles: no errors. As `anon`: insert works; select, update and delete are denied; a verdict outside the enum and a fake pattern ID are rejected.
+- **F2: save every check** (`lib/save-check.ts`). After scoring, `/api/check` inserts one row. The row is built field by field from the score result, so the offer text can't reach it, and a test checks the exact keys. Every error is caught and logs only `save failed`. The user always gets the verdict.
+- **F3: `/product` and `/about`.** These add a shared header (Lupa · Revisar oferta · Cómo funciona · Nosotros) and a shared footer. `/about` has the need, who pays, the 10:1 case and "Revisiones esta semana: N".
+- **F4: copy audit.** Green is now labeled "No encontramos señales conocidas", always followed by the safe tip. `app/copy-audit.test.tsx` fails if "segura"/"seguro" or "es real" appears in `app/` or in the labels and tips in `lib/`.
+
+### Why these choices
+- **Column-level grant on `checks`.** RLS alone would let `anon` set `created_at` and backdate or future-date rows to inflate the North Star. `anon` can insert only `verdict, score, pattern_ids, simulated`, so `id` and `created_at` always come from the defaults. Everything else is revoked from `anon` and `authenticated`.
+- **The save is awaited, with a 3-second timeout, instead of `after()`.** Awaiting makes PACKET §12.4 deterministic: the counter is already one higher when the verdict arrives. The insert normally takes about 100 ms. Its timeout bounds the worst case, and a failure can't change the answer. `after()` would hide even that latency, but it runs outside the request, which makes it hard to test, and it depends on Vercel's `waitUntil`. If latency becomes a problem, revisit this.
+- **Score is clamped to 0–100 before saving.** Today's maximum is far below 100, but a future pattern set must not make inserts fail the table's check.
+- **The counter is read at request time** (`connection()` inside `<Suspense fallback={null}>`). `cacheComponents` is on, so without this the number would be frozen at build time. If the call fails, the component renders nothing: no error, no "0".
+- **The footer keeps "Lo analiza una IA de Google."** The spec footer is "Lupa no guarda lo que pegas.". We kept the persona-test fix (confusion #7) in front of it, so the footer is honest about where the text goes. It now lives in the layout, so it appears once on every page.
+- **The home headline changed** from "¿Esta oferta de trabajo es real?" to "¿Esta oferta de trabajo tiene señales de fraude?". The old question promised an answer about whether the offer is real, which Lupa can't give (Charter principle 3).
+- **`/about` says there are no sponsors yet.** PACKET §8 says the model is stated, not signed. Claiming sponsors would be false.
+
+### Bug #3 — 🟢 verdict contradicted itself
+**Symptom:** Offer 4 (the cashier) scores 1, so it's green, but it matches `no_company_name` (weight 1). With the new label, the screen said "No encontramos señales conocidas" right above "Señales de alerta encontradas: No dicen el nombre de la empresa". The old safe tip also opened with "Se ve normal… la dirección es real", which implied the offer was fine.
+**Cause:** The scoring bands let green carry low-weight matches (0–2). The result screen used one heading for every color.
+**Fix:** On green, the list heading is now "Detalles menores a revisar". The flags and their sources are still shown, and the rules didn't change. The safe tip now starts with "Eso no garantiza que no sea fraude." Tests cover both. The copy audit also caught "es real" in the old tip and in the page title.
+
+### Backlog (not built: out of this week's scope)
+- ~~Upgrade Next.js 16.4.0 → 16.4.3.~~ **Done** in `chore: upgrade next to 16.4.3 (security)`. `npm audit` reported critical advisories in 16.4.0 (RCE in the image optimizer with SVG and in `use cache` functions returning typed arrays, plus a Server Actions DoS). Production dependencies now audit clean. Advisories remain in dev-only tooling (vitest, eslint deps); they never reach the deployed site. Fix them with a planned vitest major upgrade.
+- When the result screen is open, the header's "Revisar oferta" link points to the page you're already on, so it doesn't clear the result. "Revisar otra oferta" does. Watch for this in the Jorge persona test.
+- The pattern advice "Ninguna empresa real cobra…" talks about legitimate companies in general, not the user's offer, so it was kept. Reword it in both `seed.sql` and `lib/patterns.ts` if the persona test shows confusion.
+- Guardrail metric (share of 🔴/🟡) as a second SQL function. The data is already in `checks`.
+
+### Tomorrow's first move
+Run `supabase/checks.sql` in the Supabase SQL editor (after `seed.sql`). Check that the production deploy at `lupaempleo.me` saves a row per check and that the `/about` number goes up by one. Then run the PACKET §12 mechanical pass and the Jorge persona test.
