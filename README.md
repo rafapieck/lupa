@@ -60,7 +60,9 @@ Never commit real values. `.env*` is git-ignored, except `.env.example`.
 2. Open **SQL Editor** → **New query**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql), and click **Run**. This creates `fraud_patterns`, turns RLS on, and adds one policy: `anon` can `SELECT`.
 3. Open a new query, paste [`supabase/seed.sql`](supabase/seed.sql), and click **Run**. This loads the 11 patterns. You can run it again safely; it updates the rows that are already there.
 4. Check it: **Table Editor** → `fraud_patterns` should have 11 rows.
-5. Go to **Project Settings → API** and copy the Project URL and the `anon` public key into the env vars.
+5. Open a new query, paste [`supabase/checks.sql`](supabase/checks.sql), and click **Run**. This creates the `checks` table (verdict, score, matched pattern IDs, simulated flag and date; **no offer text, no user data**), turns RLS on with one policy (`anon` can only `INSERT`), adds a trigger that rejects pattern IDs not in `fraud_patterns`, and creates `checks_this_week()`, the North Star counter. It's idempotent: running it again changes nothing and gives no errors. Run it after `seed.sql`.
+6. Check it: in a new query, run `select public.checks_this_week();`. It should return `0` (or the number of checks so far).
+7. Go to **Project Settings → API** and copy the Project URL and the `anon` public key into the env vars.
 
 `lib/patterns.ts` holds the same patterns as a local fallback. If you change one, change the other: `lib/patterns.test.ts` fails when they get out of sync.
 
