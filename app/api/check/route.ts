@@ -1,5 +1,6 @@
 import { extractSignals } from "@/lib/extract";
 import { loadPatterns } from "@/lib/load-patterns";
+import { saveCheck } from "@/lib/save-check";
 import { scoreSignals } from "@/lib/score";
 import { validateOffer } from "@/lib/validate";
 
@@ -11,7 +12,8 @@ const MAX_BODY_BYTES = 20_000;
 
 /**
  * POST /api/check  { text: string }
- * Nothing the user pastes is stored or logged.
+ * Nothing the user pastes is stored or logged. Only the verdict, score,
+ * matched pattern IDs and the simulated flag are saved (lib/save-check.ts).
  */
 export async function POST(request: Request) {
   const raw = await request.text();
@@ -36,6 +38,9 @@ export async function POST(request: Request) {
     loadPatterns(),
   ]);
   const result = scoreSignals(signals, patterns);
+
+  // Never throws; a failed save still returns the verdict.
+  await saveCheck(result, simulated);
 
   return Response.json(
     { ...result, simulated },
