@@ -20,7 +20,7 @@ The 10:1 case: Lupa is worth funding if people asked for money **pause before pa
 
 | Rank | Pain | Which persona | Why it threatens the 10:1 | Fix this week? |
 |---|---|---|---|---|
-| 1 | **Offers arrive as images (flyers, screenshots) and can't be checked** | #1, #3 | If the offer can't get in, there's no verdict at all, at the exact moment of the money request. It's the timing hypothesis from the MONEY brief, in its most concrete form | **Yes → PACKET §13** |
+| 1 | **Offers arrive as images (flyers, screenshots) and can't be checked** | #1, #3 | If the offer can't get in, there's no verdict at all, at the exact moment of the money request. It's the timing hypothesis from the MONEY brief, in its most concrete form | No: backlog #1 (real users ranked company verification #1, see below) |
 | 2 | Partial paste: offers split across several messages give a weaker verdict (🟡 instead of 🔴) | #3 | A softened verdict on a real scam can let the person continue | Backlog (hint next to the textbox) |
 | 3 | 🟢 is read as "it's real" / people want a yes-or-no | #5 | Not a lost verdict, but a trust risk: the shadow clause says Lupa never says "safe" | Backlog (stronger copy under 🟢; never change the rule) |
 
