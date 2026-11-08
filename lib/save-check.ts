@@ -16,6 +16,7 @@ export type CheckRow = {
   pattern_ids: string[];
   simulated: boolean;
   repeat_visit: boolean;
+  example: boolean;
 };
 
 export function toCheckRow(
@@ -23,6 +24,7 @@ export function toCheckRow(
   simulated: boolean,
   repeatVisit: unknown = false,
   id: string = crypto.randomUUID(),
+  example: unknown = false,
 ): CheckRow {
   return {
     id,
@@ -31,6 +33,7 @@ export function toCheckRow(
     pattern_ids: result.matches.map((m) => m.id),
     simulated,
     repeat_visit: repeatVisit === true,
+    example: example === true,
   };
 }
 
@@ -44,13 +47,14 @@ export async function saveCheck(
   result: ScoreResult,
   simulated: boolean,
   repeatVisit: unknown = false,
+  example: unknown = false,
 ): Promise<string | null> {
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !key) return null;
 
-    const row = toCheckRow(result, simulated, repeatVisit);
+    const row = toCheckRow(result, simulated, repeatVisit, undefined, example);
     const supabase = createClient(url, key, { auth: { persistSession: false } });
     const { error } = await supabase
       .from("checks")

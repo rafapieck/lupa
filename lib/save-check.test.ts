@@ -29,7 +29,7 @@ describe("saveCheck", () => {
     expect(id).toMatch(UUID);
     expect(insert).toHaveBeenCalledTimes(1);
     const row = insert.mock.calls[0][0];
-    expect(Object.keys(row).sort()).toEqual(["id", "pattern_ids", "repeat_visit", "score", "simulated", "verdict"]);
+    expect(Object.keys(row).sort()).toEqual(["example", "id", "pattern_ids", "repeat_visit", "score", "simulated", "verdict"]);
     expect(row).toEqual({
       id,
       verdict: "red",
@@ -37,7 +37,13 @@ describe("saveCheck", () => {
       pattern_ids: red.matches.map((m) => m.id),
       simulated: true,
       repeat_visit: true,
+      example: false,
     });
+  });
+
+  it("flags demo checks only when example is exactly true", () => {
+    expect(toCheckRow(red, false, false, undefined, true).example).toBe(true);
+    expect(toCheckRow(red, false, false, undefined, "true").example).toBe(false);
   });
 
   it("saves repeat_visit as false for anything that isn't exactly true", () => {

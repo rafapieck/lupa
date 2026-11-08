@@ -180,3 +180,21 @@ The Layer 1 persona test (`docs/PERSONA_TEST_WEEK13.md`) ranked image offers #1.
 
 ### Tomorrow's first move
 Merge, check the 3 steps on a real phone (🔴 example offer), take the after screenshot, then run sessions #4 and #5.
+
+## 2026-11-08 — Bug #5: demo checks counted as real users (mechanical pass)
+
+### Found
+Testing the event log in production, the 2 rows in `check_events` (a copied reply and a `no_pay` answer) came from the **"Probar con un ejemplo"** offer. Every demo, by me, a teammate or the instructor, was saved as a real check: it raised the public "Revisiones esta semana" number on `/about` and would put fake pauses into the number a sponsor buys. It also marked the browser as a repeat visitor.
+
+### Fix
+- `supabase/example-flag.sql` (idempotent): `checks.example boolean default false`, insert grant updated, and `checks_this_week()` now counts `not example` only.
+- `/api/check` sets `example = true` when the validated text is exactly the built-in example (`EXAMPLE_OFFER` in `lib/fixtures/offers.ts`, shared with the form), so it can't be faked into `false` from the browser.
+- The form no longer marks the browser as "checked before" after a demo check.
+- Founder queries should add `and not c.example` (pause rate, copies).
+- Tests: the example offer is saved with `example: true`, a different offer with `false`; only an exact `true` sets the flag.
+
+### Deploy order
+Run `supabase/example-flag.sql` **before** merging. If the code ships first, the insert fails on the new column, `checkId` is `null`, the answer card hides and the verdict still shows.
+
+### Old rows
+Demo checks saved before this fix stay unflagged. They're few and from today; mark them by hand if needed.

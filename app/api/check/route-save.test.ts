@@ -11,7 +11,7 @@ vi.mock("@supabase/supabase-js", () => ({
   }),
 }));
 
-import { OFFER_1 } from "@/lib/fixtures/offers";
+import { OFFER_1, OFFER_2 } from "@/lib/fixtures/offers";
 import { POST } from "./route";
 
 function post(text: string, extra: Record<string, unknown> = {}) {
@@ -50,10 +50,19 @@ describe("POST /api/check saves an anonymous check", () => {
       pattern_ids: json.matches.map((m: { id: string }) => m.id),
       simulated: true,
       repeat_visit: false,
+      example: true, // OFFER_1 is the "Probar con un ejemplo" offer
     });
     expect(json.checkId).toMatch(/^[0-9a-f-]{36}$/);
     expect(row).not.toHaveProperty("text");
     expect(JSON.stringify(row)).not.toContain("uniforme");
+  });
+
+  it("flags only the built-in example offer as a demo check (Week 13 bug)", async () => {
+    insert.mockReturnValue({ abortSignal: () => Promise.resolve({ error: null }) });
+    await post(OFFER_1);
+    await post(OFFER_2);
+    expect(insert.mock.calls[0][0].example).toBe(true);
+    expect(insert.mock.calls[1][0].example).toBe(false);
   });
 
   it("saves repeat_visit only when the body says exactly true", async () => {
