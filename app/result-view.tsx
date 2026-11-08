@@ -1,7 +1,9 @@
 import type { ScoreResult, Verdict } from "@/lib/score";
 import CopyReply from "./copy-reply";
+import IntentCard from "./intent-card";
 
-export type CheckResult = ScoreResult & { simulated: boolean };
+// checkId is null when the check could not be saved: then no events are sent.
+export type CheckResult = ScoreResult & { simulated: boolean; checkId?: string | null };
 
 const THEME: Record<Verdict, { band: string; circle: string; icon: string; title: string }> = {
   red: { band: "bg-red-500", circle: "bg-red-700", icon: "text-red-700", title: "text-red-800" },
@@ -78,7 +80,7 @@ export default function ResultView({
 
         {/* Persona test (Jorge): after a red verdict he didn't know what to answer
             the recruiter. Fixed template from the rules; never on green. */}
-        {result.verdict !== "green" && result.reply && <CopyReply reply={result.reply} />}
+        {result.verdict !== "green" && result.reply && <CopyReply reply={result.reply} checkId={result.checkId} />}
 
         {result.simulated && (
           // Required label for simulated AI output. Kept small and below the
@@ -88,6 +90,10 @@ export default function ResultView({
             {SIMULATED_NOTE}
           </p>
         )}
+
+        {/* Week 13 event log: one optional, anonymous tap. Hidden when the
+            check wasn't saved, so no event points to a missing check. */}
+        {result.checkId && <IntentCard key={result.checkId} checkId={result.checkId} />}
 
         <button
           type="button"

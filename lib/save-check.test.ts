@@ -9,6 +9,7 @@ import { OFFER_1 } from "./fixtures/offers";
 import { saveCheck, toCheckRow } from "./save-check";
 import { scoreSignals } from "./score";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const red = scoreSignals({ asks_for_payment: true, unrealistic_pay: true, immediate_hiring: true });
 
 describe("saveCheck", () => {
@@ -22,24 +23,37 @@ describe("saveCheck", () => {
     vi.restoreAllMocks();
   });
 
-  it("inserts only verdict, score, pattern_ids and simulated (no text field)", async () => {
+  it("inserts only id, verdict, score, pattern_ids, simulated and repeat_visit (no text field)", async () => {
     insert.mockReturnValue({ abortSignal: () => Promise.resolve({ error: null }) });
-    expect(await saveCheck(red, true)).toBe(true);
+    const id = await saveCheck(red, true, true);
+    expect(id).toMatch(UUID);
     expect(insert).toHaveBeenCalledTimes(1);
     const row = insert.mock.calls[0][0];
-    expect(Object.keys(row).sort()).toEqual(["pattern_ids", "score", "simulated", "verdict"]);
+    expect(Object.keys(row).sort()).toEqual(["id", "pattern_ids", "repeat_visit", "score", "simulated", "verdict"]);
     expect(row).toEqual({
+      id,
       verdict: "red",
       score: red.score,
       pattern_ids: red.matches.map((m) => m.id),
       simulated: true,
+      repeat_visit: true,
     });
+  });
+
+  it("saves repeat_visit as false for anything that isn't exactly true", () => {
+    for (const v of [undefined, "true", 1, "yes", null]) {
+      expect(toCheckRow(red, false, v).repeat_visit).toBe(false);
+    }
+  });
+
+  it("gives every check a new id", () => {
+    expect(toCheckRow(red, false).id).not.toBe(toCheckRow(red, false).id);
   });
 
   it("returns false and logs only 'save failed' when the insert errors", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     insert.mockReturnValue({ abortSignal: () => Promise.resolve({ error: { message: OFFER_1 } }) });
-    expect(await saveCheck(red, false)).toBe(false);
+    expect(await saveCheck(red, false)).toBeNull();
     expect(warn).toHaveBeenCalledWith("save failed");
     for (const args of warn.mock.calls) expect(args.join(" ")).not.toContain("uniforme");
   });
@@ -49,12 +63,12 @@ describe("saveCheck", () => {
     insert.mockImplementation(() => {
       throw new Error("network down");
     });
-    await expect(saveCheck(red, false)).resolves.toBe(false);
+    await expect(saveCheck(red, false)).resolves.toBeNull();
   });
 
   it("does nothing without Supabase env vars", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
-    expect(await saveCheck(red, false)).toBe(false);
+    expect(await saveCheck(red, false)).toBeNull();
     expect(insert).not.toHaveBeenCalled();
   });
 

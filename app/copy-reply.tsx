@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { sendEvent } from "@/lib/send-event";
 
 export const REPLY_TITLE = "Si quieres contestarle, copia esto:";
 export const COPY_LABEL = "Copiar mensaje";
@@ -38,9 +39,11 @@ export async function copyText(text: string): Promise<boolean> {
  * The reply is a fixed template from fraud_patterns.reply_es, chosen by the
  * rules in lib/score.ts. The AI never writes it.
  */
-export default function CopyReply({ reply }: { reply: string }) {
+export default function CopyReply({ reply, checkId }: { reply: string; checkId?: string | null }) {
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // One reply_copied event per result, however many times they tap.
+  const reported = useRef(false);
 
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
@@ -49,6 +52,10 @@ export default function CopyReply({ reply }: { reply: string }) {
   async function handleCopy() {
     const ok = await copyText(reply);
     setStatus(ok ? "copied" : "failed");
+    if (ok && !reported.current) {
+      reported.current = true;
+      sendEvent(checkId, "reply_copied");
+    }
     if (timer.current) clearTimeout(timer.current);
     if (ok) timer.current = setTimeout(() => setStatus("idle"), 2500);
   }

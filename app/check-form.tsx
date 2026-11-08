@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { hasCheckedBefore, markChecked } from "@/lib/send-event";
 import { MAX_CHARS, validateOffer } from "@/lib/validate";
 import ResultView, { type CheckResult } from "./result-view";
 
@@ -31,13 +32,14 @@ export default function CheckForm() {
       const res = await fetch("/api/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: validation.text }),
+        body: JSON.stringify({ text: validation.text, repeatVisit: hasCheckedBefore() }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.verdict) {
         setError(data?.error ?? NETWORK_ERROR);
         return;
       }
+      markChecked();
       setResult(data as CheckResult);
       window.scrollTo(0, 0);
     } catch {
