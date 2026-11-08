@@ -196,5 +196,8 @@ Testing the event log in production, the 2 rows in `check_events` (a copied repl
 ### Deploy order
 Run `supabase/example-flag.sql` **before** merging. If the code ships first, the insert fails on the new column, `checkId` is `null`, the answer card hides and the verdict still shows.
 
+### Verified in production
+After deploy 3, a demo check at 15:40 (CDMX) was saved with `example = TRUE` (`docs/evidence/bug5-after-example-flag.png`). Before the fix, the same demo produced the `check_events` rows in `docs/evidence/event-log-check-events.png` with no way to tell them apart.
+
 ### Old rows
 Demo checks saved before this fix stay unflagged. They're few and from today; mark them by hand if needed.
