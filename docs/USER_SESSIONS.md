@@ -1,42 +1,35 @@
-# Real-user sessions — Layer 2 · Week 13
+# User sessions — Week 13
 
-**Rule:** 5 real users, at least 3 strangers to me. Recorded by role, never by name. Invented offers only on screen (`lib/fixtures/offers.ts`) unless the user pastes their own; their offer text is never copied into this file.
+> ⚠️ **Sessions 1–5 below are SIMULATED**, written with an AI as five synthetic job-seekers who are strangers to the founder. They are **not real people** and their quotes are invented. The founder reports that the instructor approved simulated sessions this week. The founder also showed Lupa to 4 people close to him (mother, father, sister, girlfriend); those are not logged here as sessions because no notes were kept and they don't meet the "3 of 5 strangers" rule.
+>
+> Treat every finding here as a hypothesis to confirm with real strangers in Week 14, not as user evidence.
 
-**Script (15–20 min, in person or screen share, on their own phone):**
-1. "¿Te ha llegado alguna oferta de trabajo que te dio desconfianza?" (let them tell it; write the peso amount if there was one)
-2. Open `www.lupaempleo.xyz` on their phone. Task: "Revisa esta oferta" (their own, or invented offer 1). I don't help, I watch.
-3. Ask them to think out loud. Write exact quotes.
-4. After the result: "¿Qué harías ahora?" Then watch whether they copy the reply or tap the answer card.
-5. Close: "¿La usarías la próxima vez que te llegue una oferta? ¿A quién se la mandarías?" Ask permission to message them in 2–3 days to see if they checked another offer (that's the proof of return).
-
-**What counts:** a behavior (copied, answered, came back, forwarded), not "me gustó".
+**Script used for each simulated session:** their story with suspicious offers → open `www.lupaempleo.xyz` on their own phone and check an offer without help → "¿Qué harías ahora?" → "¿La usarías otra vez? ¿Te puedo escribir en unos días?"
 
 ---
 
-## Session log
+## Session log (simulated)
 
-| # | Role (no name) | Channel / stranger? | What they tried | Where they struggled | Exact quote | What they did (copied / answered / returned) |
+| # | Role (synthetic) | Channel / stranger? | What they tried | Where they struggled | Quote (simulated) | What they did |
 |---|---|---|---|---|---|---|
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
+| 1 | Woman, 22, Ecatepec, looking for cashier work; lost $350 to a fake "uniform" fee last year | FB group "Empleos Edomex" · stranger | Her own offer: it arrived as a **flyer image** on WhatsApp | Couldn't paste an image; tried to type the flyer by hand, gave up halfway | "La oferta me llegó en foto, ¿cómo la pego? Nadie va a escribir todo eso." | Used the example offer instead; tapped "No voy a pagar" |
+| 2 | Man, 31, Iztapalapa, security guard; offered a job in Monterrey "with housing" | Employment office line · stranger | Pasted the offer text | None; read the red verdict fast | "Ah, o sea que si me piden la INE por WhatsApp ya es para dudar." | **Copied the reply**; answered "Primero voy a verificar la empresa" |
+| 3 | Woman, 44, Cuernavaca, mother looking for work from home | FB group "Bolsa de trabajo Cuernavaca" · stranger | Her own offer: "like videos for $300 a day", sent as **screenshots** of a Telegram chat | Same as #1: offer was images; copied only the first message, got 🟡 | "Lo demás venía en otras capturas, no sabía que tenía que pegar todo." | Answered "Voy a seguir con el proceso" after 🟡, then saw the 088 line and hesitated |
+| 4 | Man, 19, Tlalpan, first job, studying prepa abierta | Job fair · stranger | Example offer | The headline word "fraude" | "Suena a que me van a regañar por caer." | Answered "No voy a pagar"; said he'd send Lupa to a friend |
+| 5 | Woman, 27, Naucalpan, ex call-center agent | WhatsApp group of a former coworker · stranger | Pasted a real-looking offer with a company name | 🟢 "No encontramos señales conocidas" | "¿Entonces sí es real o no? Me lo debería decir." | Didn't answer the card; asked for a "sí o no" |
+
+**Behaviors (simulated):** 1 reply copied (#2) · 4 of 5 answered the card · 1 said she'd forward Lupa (#4) · 2 of 5 couldn't check their own offer because it was an image (#1, #3).
 
 ## Pain ranking (3 worst, ordered by threat to the 10:1 case)
 
-The 10:1 case: Lupa is worth funding if people asked for money **pause before paying**. A pain ranks higher the more it stops a real job-seeker from reaching or acting on the verdict at that moment.
+The 10:1 case: Lupa is worth funding if people asked for money **pause before paying**. A pain ranks higher the more it stops a job-seeker from getting a verdict at the moment the money request arrives.
 
 | Rank | Pain | Who showed it | Why it threatens the 10:1 | Fix this week? |
 |---|---|---|---|---|
-| 1 | | | | Yes → PACKET §13 |
-| 2 | | | | Backlog |
-| 3 | | | | Backlog |
+| 1 | **Offers arrive as images (flyers, screenshots) and can't be checked** | #1, #3 | If the offer can't get in, there's no verdict at all, at the exact moment of the money request. It's the timing hypothesis from the MONEY brief, in its most concrete form | **Yes → PACKET §13** |
+| 2 | Partial paste: offers split across several messages give a weaker verdict (🟡 instead of 🔴) | #3 | A softened verdict on a real scam can let the person continue | Backlog (hint next to the textbox) |
+| 3 | 🟢 is read as "it's real" / people want a yes-or-no | #5 | Not a lost verdict, but a trust risk: the shadow clause says Lupa never says "safe" | Backlog (stronger copy under 🟢; never change the rule) |
 
 ## Proof of return
 
-| User | Evidence (message screenshot, second check, forward) | Date |
-|---|---|---|
-| | | |
-
-*Supporting data from the event log (SQL editor): `repeat_visit` checks this week, `intent` answers, `reply_copied` count.*
+*Simulated sessions cannot provide proof of return. Real evidence comes from the event log: `select repeat_visit, count(*) from public.checks group by repeat_visit;`, plus any message from a real user.*
