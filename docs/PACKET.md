@@ -162,9 +162,9 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 | | |
 |---|---|
 | Pain #1 (from sessions) | Offers arrive as **images** (WhatsApp flyers, screenshots of chats) and can't be pasted, so the person gets no verdict at all |
-| Who showed it + quote | Simulated sessions #1 and #3 (`docs/USER_SESSIONS.md`, labeled simulated): "La oferta me llegó en foto, ¿cómo la pego? Nadie va a escribir todo eso." |
+| Who showed it + quote | Persona test, synthetic users #1 and #3 (`docs/PERSONA_TEST_WEEK13.md`); to confirm with the real sessions in `docs/USER_SESSIONS.md`: "La oferta me llegó en foto, ¿cómo la pego? Nadie va a escribir todo eso." |
 | Why it threatens the 10:1 case | No verdict means no pause. It hits at the exact moment the recruiter asks for money: the timing hypothesis from the MONEY brief in its most concrete form |
 | The fix (one feature) | **"Subir captura o foto"** on the home screen. The image goes to the server, Gemini only **transcribes the text** (no verdict), and that text runs through the same validation, signals and rules. Neither the image nor the transcribed text is stored. If Gemini is unavailable, a friendly message asks to paste the text instead |
 | Before / after evidence | Before: home screen with only the paste box (screenshot). After: the same offer as an image → 🔴 with flags and sources (screenshot) |
 
-**Scope note:** §10 put screenshot reading out of scope unless the sessions ranked it #1 and it fit one fix. Both happened, so it moves in as one feature: one image per check, JPG/PNG/WebP up to 4 MB, no gallery, no other OCR.
+**Scope note:** §10 put screenshot reading out of scope unless the sessions ranked it #1 and it fit one fix. The persona test ranked it #1 and it fits one fix, so it moves in as one feature: one image per check, JPG/PNG/WebP up to 4 MB, no gallery, no other OCR.
