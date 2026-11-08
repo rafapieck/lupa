@@ -24,7 +24,7 @@ Real people looking for entry-level work **right now**, who find offers in Faceb
 > **Before the module closes**, at `www.lupaempleo.xyz`:
 > 1. After every verdict, the visitor can answer **one anonymous tap**: "¿Qué vas a hacer con esta oferta?" The answer is saved as an event linked to that check, with no offer text and no user data.
 > 2. Copying the suggested reply is saved as an event too, so I can see who **acted**, not only who read.
-> 3. Each check records whether this browser had checked before (`returning`), with no ID, cookie or personal data, so a **return visit is provable**.
+> 3. Each check records whether this browser had checked before (`repeat_visit`), with no ID, cookie or personal data, so a **return visit is provable**.
 > 4. The #1 pain found in the real sessions (§13) is fixed and redeployed, with before/after screenshots.
 
 ## 4. Mockup (image-generated)
@@ -40,7 +40,7 @@ Real people looking for entry-level work **right now**, who find offers in Faceb
 ```mermaid
 flowchart TD
   A[Visitor pastes offer] --> B[API: AI extracts signals, rules score]
-  B --> C[Save check: verdict, score, pattern IDs, simulated, returning]
+  B --> C[Save check: verdict, score, pattern IDs, simulated, repeat visit]
   C --> D[Show verdict + flags + next step]
   D --> E{Yellow or red?}
   E -- Yes --> F[Show reply box]
@@ -64,7 +64,7 @@ flowchart LR
     U3[Copies reply or taps an answer]
   end
   subgraph APP[Lupa site]
-    A1[Marks returning if this browser checked before]
+    A1[Marks repeat visit if this browser checked before]
     A2[Shows verdict and the answer card]
     A3[Sends event: check id + kind + answer]
   end
@@ -109,7 +109,7 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 | **Shadow clause: false validation.** A product that looks proven because testers were polite; for Lupa, a false "safe" lends a scammer my credibility | Lupa never says "safe" (copy audit test). Sessions count only **behaviors** (a copy, an answer, a return), never "I liked it". The sponsor number counts only money requests not paid, never visits or total checks |
 | **Forbidden zone:** no friends-and-family-only testing | 3 of 5 users are strangers; recruiting channel logged per session |
 | **AI never decides** | Unchanged: rules-only verdict in `lib/score.ts` |
-| **No text or user data stored** | `check_events` holds only check id, kind, answer and date. `returning` is a yes/no computed in the browser; no ID, cookie or fingerprint is sent |
+| **No text or user data stored** | `check_events` holds only check id, kind, answer and date. `repeat_visit` is a yes/no computed in the browser; no ID, cookie or fingerprint is sent |
 
 ## 10. Scope cut — NOT building this week
 
@@ -127,14 +127,14 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 | Hosting + domain | Vercel + `www.lupaempleo.xyz` | URL of record |
 | AI | Google Gemini Flash Lite (free tier) | Extracts signals only; keyword fallback labeled on screen |
 | Rules | `lib/score.ts` | Deterministic, tested |
-| Saved checks | Supabase `checks` | RLS ON, insert-only. **New:** server-generated `id` returned to the browser, and a `returning` boolean |
+| Saved checks | Supabase `checks` | RLS ON, insert-only. **New:** server-generated `id` returned to the browser, and a `repeat_visit` boolean |
 | **New: event log** | Supabase `check_events` | RLS ON, insert-only. Columns: `id`, `created_at`, `check_id` (FK to checks), `kind` (`reply_copied` / `intent`), `answer` (fixed list or null) |
 | **New: event route** | `POST /api/event` | Validates check id (uuid), kind and answer against fixed lists; never blocks the UI |
 | Secrets | Vercel env vars only | |
 
 **Intent answers (fixed list):** `no_pay` "No voy a pagar ni mandar documentos" · `verify` "Primero voy a verificar la empresa" · `continue` "Voy a seguir con el proceso" · `already_paid` "Ya había pagado o mandado documentos".
 
-**What the founder can count (SQL editor):** checks with a money pattern matched → share with an `intent` event → share answering `no_pay` or `verify` (the "pause rate") · `reply_copied` per red/yellow check · share of `returning` checks.
+**What the founder can count (SQL editor):** checks with a money pattern matched → share with an `intent` event → share answering `no_pay` or `verify` (the "pause rate") · `reply_copied` per red/yellow check · share of `repeat_visit` checks.
 
 ## 12. Test plan
 
@@ -144,7 +144,7 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 3. `/api/event` accepts only a valid uuid, a known `kind`, and for `intent` only one of the 4 answers; anything else → 400, nothing saved.
 4. Anon key cannot `select`, `update` or `delete` `check_events` (RLS); an event for a non-existent check id is rejected by the foreign key.
 5. Tapping an answer shows the thank-you line even if the save fails (saving never blocks the UI).
-6. `returning` is false on the first check in a fresh browser and true on the second; nothing else about the browser is sent.
+6. `repeat_visit` is false on the first check in a fresh browser and true on the second; nothing else about the browser is sent.
 7. Copy audit still passes: no "segura" / "es real" in any new text.
 8. Security floor: no keys in the repo (`git grep`), inputs validated on client and server, RLS on both tables.
 9. Find at least one bug, fix it, redeploy, log it in `DECISIONS.md`.

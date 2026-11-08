@@ -14,20 +14,20 @@ This week we add an **anonymous event log** so the founder can see what real peo
 
 ## Features (build in this order, one commit each)
 
-### F1 — SQL: check ids, `returning`, and `check_events` (`supabase/events.sql`, idempotent)
-- `checks`: add `returning boolean not null default false`. Grant anon insert on `id` and `returning` in addition to the current columns (`created_at` stays default-only).
+### F1 — SQL: check ids, `repeat_visit`, and `check_events` (`supabase/events.sql`, idempotent)
+- `checks`: add `repeat_visit boolean not null default false`. Grant anon insert on `id` and `repeat_visit` in addition to the current columns (`created_at` stays default-only).
 - New table `check_events`: `id uuid pk default gen_random_uuid()`, `created_at timestamptz not null default now()`, `check_id uuid not null references checks(id) on delete cascade`, `kind text not null check (kind in ('reply_copied','intent'))`, `answer text null check (answer is null or answer in ('no_pay','verify','continue','already_paid'))`, plus a check constraint: `kind = 'intent'` requires an answer, `kind = 'reply_copied'` requires `answer is null`.
 - RLS ON, one policy: anon can `insert`. `revoke all` from anon/authenticated, then `grant insert (check_id, kind, answer)`. No select, update or delete.
 - The FK must not let anon read `checks`: the insert-only grant is enough because FK checks run as the table owner.
 
 **Acceptance:** running the file twice gives no error; anon cannot select either table; an event with an unknown check id fails; an `intent` without an answer fails.
 
-### F2 — Server: return a check id and save `returning`
+### F2 — Server: return a check id and save `repeat_visit`
 - `lib/save-check.ts`: generate the id with `crypto.randomUUID()` on the server, insert it with the row, and return `{ saved: boolean, checkId: string }`. The id is returned even if the save fails, but then the client must not send events for it (send `checkId: null`).
-- `toCheckRow(result, simulated, returning)`: adds `returning` (boolean only; anything else → false).
-- `/api/check`: read an optional boolean `returning` from the body (default false), pass it through, and respond with `{ ...result, simulated, checkId }`.
+- `toCheckRow(result, simulated, repeatVisit)`: adds `repeat_visit` (boolean only; anything else → false).
+- `/api/check`: read an optional boolean `repeatVisit` from the body (default false), pass it through, and respond with `{ ...result, simulated, checkId }`.
 
-**Acceptance (tests):** response includes a uuid `checkId` when saved and `null` when not; the inserted row has exactly the keys `id, verdict, score, pattern_ids, simulated, returning`; a non-boolean `returning` is saved as false.
+**Acceptance (tests):** response includes a uuid `checkId` when saved and `null` when not; the inserted row has exactly the keys `id, verdict, score, pattern_ids, simulated, repeat_visit`; a non-boolean `repeat_visit` is saved as false.
 
 ### F3 — Server: `POST /api/event` + `lib/save-event.ts`
 - Body: `{ checkId: string, kind: 'reply_copied' | 'intent', answer?: 'no_pay' | 'verify' | 'continue' | 'already_paid' }`. Raw body cap 1 KB.
@@ -36,10 +36,10 @@ This week we add an **anonymous event log** so the founder can see what real peo
 
 **Acceptance (tests):** each invalid case returns 400 and calls no insert; a valid intent inserts exactly `{ check_id, kind, answer }`; a DB failure still returns 200.
 
-### F4 — Client: `returning` flag
-- In `app/check-form.tsx`, before posting, read `localStorage['lupa_checked_before']` (inside try/catch). Send `returning: true` if it is `'1'`. After a successful verdict, set it to `'1'`. Nothing else is stored or sent.
+### F4 — Client: repeat-visit flag
+- In `app/check-form.tsx`, before posting, read `localStorage['lupa_checked_before']` (inside try/catch). Send `repeatVisit: true` if it is `'1'`. After a successful verdict, set it to `'1'`. Nothing else is stored or sent.
 
-**Acceptance:** first check in a clean browser sends `returning: false`, the second sends `true`; a throwing `localStorage` sends `false` and still works.
+**Acceptance:** first check in a clean browser sends `repeatVisit: false`, the second sends `true`; a throwing `localStorage` sends `false` and still works.
 
 ### F5 — Client: answer card + reply-copied event
 - New `app/intent-card.tsx`, rendered at the bottom of `ResultView` on **every** verdict when `checkId` is not null. Title: "¿Qué vas a hacer con esta oferta?". Four stacked, full-width buttons **with the same neutral style** (no green "go" button: the design must not reward continuing). Labels: "No voy a pagar ni mandar documentos", "Primero voy a verificar la empresa", "Voy a seguir con el proceso", "Ya había pagado o mandado documentos".
@@ -49,17 +49,17 @@ This week we add an **anonymous event log** so the founder can see what real peo
 **Acceptance (tests):** card hidden when `checkId` is null; tapping sends the right body and shows the thank-you line even when fetch rejects; `already_paid` shows the 088 line; copy sends one `reply_copied` event; copy audit passes.
 
 ### F6 — Docs and session close
-- `README.md`: new env-free setup step for `supabase/events.sql` and the founder's SQL queries (pause rate, copies per red/yellow check, returning share).
-- `DECISIONS.md`: entry for the event log (why fixed answers, why neutral buttons, why `returning` instead of an ID) and tomorrow's first move.
+- `README.md`: new env-free setup step for `supabase/events.sql` and the founder's SQL queries (pause rate, copies per red/yellow check, repeat-visit share).
+- `DECISIONS.md`: entry for the event log (why fixed answers, why neutral buttons, why `repeat_visit` instead of an ID) and tomorrow's first move.
 - `docs/USER_SESSIONS.md`: template for the 5 real-user sessions.
 
 ## Commit plan
 
 1. `docs: Week 13 PACKET` ✅
 2. `docs: Week 13 mockup` ✅
-3. `feat(db): check ids, returning flag and check_events (insert-only)` (F1)
-4. `feat(api): return check id, save returning, add /api/event` (F2 + F3)
-5. `feat(ui): answer card, reply-copied event, returning flag` (F4 + F5)
+3. `feat(db): check ids, repeat-visit flag and check_events (insert-only)` (F1)
+4. `feat(api): return check id, save repeat visit, add /api/event` (F2 + F3)
+5. `feat(ui): answer card, reply-copied event, repeat-visit flag` (F4 + F5)
 6. `docs: README, DECISIONS, USER_SESSIONS template` (F6) → **deploy 1**
 7. `docs: PACKET §13 — #1 real-user pain` (after sessions)
 8. `fix: <#1 pain>` → **deploy 2**
@@ -67,4 +67,4 @@ This week we add an **anonymous event log** so the founder can see what real peo
 
 ## Deploy order
 
-Run `supabase/events.sql` **before** merging. If code ships first, the insert with `id`/`returning` fails, `saveCheck` returns `checkId: null`, the card stays hidden and the verdict still shows: no user ever sees a broken screen.
+Run `supabase/events.sql` **before** merging. If code ships first, the insert with `id`/`repeat_visit` fails, `saveCheck` returns `checkId: null`, the card stays hidden and the verdict still shows: no user ever sees a broken screen.
