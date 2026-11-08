@@ -113,7 +113,7 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 
 ## 10. Scope cut — NOT building this week
 
-- ❌ WhatsApp bot and screenshot reading (3-year vision), even though it's my timing hypothesis. It only enters this week if the real sessions rank it #1 *and* it fits one fix
+- ❌ WhatsApp bot and screenshot reading (3-year vision), even though it's my timing hypothesis. Real users didn't rank it #1 this week (backlog)
 - ❌ Accounts, login, email capture or any way to contact the user
 - ❌ A public dashboard of events. The founder reads totals in the SQL editor
 - ❌ Free-text feedback (it would invite personal data). Fixed answers only
@@ -161,8 +161,10 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 
 | | |
 |---|---|
-| Pain #1 (from sessions) | |
-| Who showed it + exact quote | |
-| Why it threatens the 10:1 case | |
-| The fix (one feature) | |
-| Before / after evidence | |
+| Pain #1 (from sessions) | People **don't know how to verify the company is real**, so after "no pagues" the only thing between them and the deposit is a hunch |
+| Who showed it + quote | Real users #1 and #3 (`docs/USER_SESSIONS.md`), both strangers, both left to search online on their own. #1: "Si me están ofreciendo trabajo, ¿por qué yo tengo que pagarles a ellos?" #3: "Lo que me hizo sospechar fue que me estaban presionando para depositar ese mismo día." |
+| Why it threatens the 10:1 case | The sponsor pays for pauses. A verdict without a way to check the company leaves the person alone against same-day pressure, and the pause can still turn into a deposit |
+| The fix (one feature) | **"Antes de pagar o mandar documentos, verifica la empresa"**: a fixed, 3-step card on every 🟡/🔴 result, right below "Qué hacer ahora". (1) Search the company name + "fraude". (2) Find the official website and phone yourself; never use the number or link they sent. (3) Ask for the address and an in-person or video interview before any payment. Fixed text, no AI, nothing stored |
+| Before / after evidence | Before: 🔴 result with "Qué hacer ahora" and the reply box only (screenshot). After: the same 🔴 result with the 3 verification steps (screenshot) |
+
+**Change from the persona test:** the Layer 1 test (`docs/PERSONA_TEST_WEEK13.md`) ranked image offers #1. The real users ranked company verification #1, and real users outrank synthetic ones, so image upload moves to the backlog.

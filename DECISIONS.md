@@ -158,3 +158,25 @@ This session had no package installs, so `npm test`, lint and build didn't run h
 
 ### Tomorrow's first move
 Run `supabase/events.sql` in Supabase, merge the Week 13 PR, check on a real phone that tapping an answer adds a row to `check_events`, then run the first 2–3 real-user sessions with `docs/USER_SESSIONS.md`.
+
+## 2026-11-08 — Week 13 fix #1: "verifica la empresa" (from real users)
+
+### Finding
+Real users #1 and #3 (both strangers, `docs/USER_SESSIONS.md`) got the verdict but **didn't know how to check whether the company existed**. Both went to search online on their own. #3 was being pressured to deposit $1,000 the same day. Lupa said "no pagues", but left them alone with the hardest part.
+
+### Fix (one feature)
+A fixed card on every 🟡/🔴 result, right below "Qué hacer ahora" and above the reply box: **"Antes de pagar o mandar documentos, verifica la empresa:"** with 3 steps (search the name + "fraude"; find the official site and phone yourself, never the number or link they sent; ask for the address and an in-person or video interview before any payment). Fixed text in `app/verify-steps.tsx`, never written by the AI. Hidden on 🟢.
+
+### Why this and not image upload
+The Layer 1 persona test (`docs/PERSONA_TEST_WEEK13.md`) ranked image offers #1. Real users outrank synthetic ones, and none of the 3 real users had that problem. Image upload stays in the backlog.
+
+### Backlog from the real sessions
+- Professional-looking offers feel real even with red flags (#2).
+- Same-day deposit pressure (#3): consider a line that names the pressure ("Si te apuran a depositar hoy, es otra señal").
+
+### Open
+- User #2's answer on the card wasn't recorded exactly (notes said "reportar", which isn't an option). Confirm with the founder.
+- 2 more sessions needed, at least 1 stranger.
+
+### Tomorrow's first move
+Merge, check the 3 steps on a real phone (🔴 example offer), take the after screenshot, then run sessions #4 and #5.
