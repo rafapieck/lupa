@@ -27,3 +27,24 @@ The 10:1 case: Lupa is worth funding if people asked for money **pause before pa
 ## Proof of return
 
 *A persona test cannot provide proof of return. Real evidence comes from the event log: `select repeat_visit, count(*) from public.checks group by repeat_visit;`, plus any message from a real user.*
+
+## Every confusion logged
+
+| Persona | Screen | Confusion |
+|---|---|---|
+| #1 cashier, 22 | Home | Offer arrived as a flyer image; nowhere to put it |
+| #1 | Home | Tried to type the flyer by hand, gave up halfway |
+| #3 mother, 44 | Home | Offer was 4 screenshots of a chat; pasted only the first message |
+| #3 | Result (🟡) | Softer verdict than the full offer deserved; answered "Voy a seguir" |
+| #4 first job, 19 | Home | The word "fraude" in the headline felt like being scolded |
+| #5 ex call center, 27 | Result (🟢) | Read "no encontramos señales conocidas" as "it's real"; wanted a yes or no |
+
+## What I fixed, and why not the persona #1
+
+**Worst persona finding:** image offers (#1, #3). It is **not fixed this week**, on purpose. The same day, real users (`docs/USER_SESSIONS.md`) showed a different #1: they didn't know **how to verify the company**. Real users outrank synthetic ones, and the Charter allows one fix per round, so the fix shipped was **"Antes de pagar o mandar documentos, verifica la empresa"** (3 fixed steps on 🟡/🔴, deploy 2, `docs/evidence/fix1-after-*.png`).
+
+**How the persona test still changed the product:**
+- It is why the fix is **fixed text below "Qué hacer ahora"**, not a link or a longer page: personas #1 and #3 dropped off as soon as they had to do extra work.
+- It confirmed the shadow clause: persona #5 wanted Lupa to say "es real". Lupa still never says it (copy audit test).
+
+**Backlog, in order:** (1) image or screenshot upload (personas #1, #3), (2) hint to paste every message of the offer (#3), (3) clearer line under 🟢 that Lupa can't confirm a job is real (#5), (4) softer headline wording (#4).
