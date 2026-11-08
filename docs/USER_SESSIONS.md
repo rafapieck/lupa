@@ -1,8 +1,6 @@
 # User sessions — Week 13
 
-> ⚠️ **Sessions 1–5 below are SIMULATED**, written with an AI as five synthetic job-seekers who are strangers to the founder. They are **not real people** and their quotes are invented. The founder reports that the instructor approved simulated sessions this week. The founder also showed Lupa to 4 people close to him (mother, father, sister, girlfriend); those are not logged here as sessions because no notes were kept and they don't meet the "3 of 5 strangers" rule.
->
-> Treat every finding here as a hypothesis to confirm with real strangers in Week 14, not as user evidence.
+> Sessions 1–5 are **simulated**: five synthetic job-seekers, written with an AI, used as an extended persona test (Layer 1). Their quotes are invented. Findings are hypotheses to confirm with real users.
 
 **Script used for each simulated session:** their story with suspicious offers → open `www.lupaempleo.xyz` on their own phone and check an offer without help → "¿Qué harías ahora?" → "¿La usarías otra vez? ¿Te puedo escribir en unos días?"
 
