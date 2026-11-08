@@ -113,7 +113,7 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 
 ## 10. Scope cut — NOT building this week
 
-- ❌ WhatsApp bot and screenshot reading (3-year vision), even though it's my timing hypothesis. It only enters this week if the real sessions rank it #1 *and* it fits one fix
+- ❌ WhatsApp bot and screenshot reading (3-year vision), even though it's my timing hypothesis. Real users didn't rank it #1 this week (backlog)
 - ❌ Accounts, login, email capture or any way to contact the user
 - ❌ A public dashboard of events. The founder reads totals in the SQL editor
 - ❌ Free-text feedback (it would invite personal data). Fixed answers only
@@ -161,10 +161,10 @@ The job seeker never pays, and no employer can buy a verdict (Charter). Payers, 
 
 | | |
 |---|---|
-| Pain #1 (from sessions) | Offers arrive as **images** (WhatsApp flyers, screenshots of chats) and can't be pasted, so the person gets no verdict at all |
-| Who showed it + quote | Persona test, synthetic users #1 and #3 (`docs/PERSONA_TEST_WEEK13.md`); to confirm with the real sessions in `docs/USER_SESSIONS.md`: "La oferta me llegó en foto, ¿cómo la pego? Nadie va a escribir todo eso." |
-| Why it threatens the 10:1 case | No verdict means no pause. It hits at the exact moment the recruiter asks for money: the timing hypothesis from the MONEY brief in its most concrete form |
-| The fix (one feature) | **"Subir captura o foto"** on the home screen. The image goes to the server, Gemini only **transcribes the text** (no verdict), and that text runs through the same validation, signals and rules. Neither the image nor the transcribed text is stored. If Gemini is unavailable, a friendly message asks to paste the text instead |
-| Before / after evidence | Before: home screen with only the paste box (screenshot). After: the same offer as an image → 🔴 with flags and sources (screenshot) |
+| Pain #1 (from sessions) | People **don't know how to verify the company is real**, so after "no pagues" the only thing between them and the deposit is a hunch |
+| Who showed it + quote | Real users #1 and #3 (`docs/USER_SESSIONS.md`), both strangers, both left to search online on their own. #1: "Si me están ofreciendo trabajo, ¿por qué yo tengo que pagarles a ellos?" #3: "Lo que me hizo sospechar fue que me estaban presionando para depositar ese mismo día." |
+| Why it threatens the 10:1 case | The sponsor pays for pauses. A verdict without a way to check the company leaves the person alone against same-day pressure, and the pause can still turn into a deposit |
+| The fix (one feature) | **"Antes de pagar o mandar documentos, verifica la empresa"**: a fixed, 3-step card on every 🟡/🔴 result, right below "Qué hacer ahora". (1) Search the company name + "fraude". (2) Find the official website and phone yourself; never use the number or link they sent. (3) Ask for the address and an in-person or video interview before any payment. Fixed text, no AI, nothing stored |
+| Before / after evidence | Before: 🔴 result with "Qué hacer ahora" and the reply box only (screenshot). After: the same 🔴 result with the 3 verification steps (screenshot) |
 
-**Scope note:** §10 put screenshot reading out of scope unless the sessions ranked it #1 and it fit one fix. The persona test ranked it #1 and it fits one fix, so it moves in as one feature: one image per check, JPG/PNG/WebP up to 4 MB, no gallery, no other OCR.
+**Change from the persona test:** the Layer 1 test (`docs/PERSONA_TEST_WEEK13.md`) ranked image offers #1. The real users ranked company verification #1, and real users outrank synthetic ones, so image upload moves to the backlog.
