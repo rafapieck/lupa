@@ -11,9 +11,10 @@ export const maxDuration = 30;
 const MAX_BODY_BYTES = 20_000;
 
 /**
- * POST /api/check  { text: string }
+ * POST /api/check  { text: string, repeatVisit?: boolean }
  * Nothing the user pastes is stored or logged. Only the verdict, score,
- * matched pattern IDs and the simulated flag are saved (lib/save-check.ts).
+ * matched pattern IDs, the simulated flag and a repeat-visit yes/no are saved
+ * (lib/save-check.ts).
  */
 export async function POST(request: Request) {
   const raw = await request.text();
@@ -28,7 +29,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "Pega el texto completo de la oferta" }, { status: 400 });
   }
 
-  const validation = validateOffer((body as { text?: unknown } | null)?.text);
+  const input = body as { text?: unknown; repeatVisit?: unknown } | null;
+  const validation = validateOffer(input?.text);
   if (!validation.ok) {
     return Response.json({ error: validation.error }, { status: 400 });
   }
@@ -39,11 +41,12 @@ export async function POST(request: Request) {
   ]);
   const result = scoreSignals(signals, patterns);
 
-  // Never throws; a failed save still returns the verdict.
-  await saveCheck(result, simulated);
+  // Never throws; a failed save still returns the verdict (checkId: null, so
+  // the browser sends no events for a check that doesn't exist).
+  const checkId = await saveCheck(result, simulated, input?.repeatVisit === true);
 
   return Response.json(
-    { ...result, simulated },
+    { ...result, simulated, checkId },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

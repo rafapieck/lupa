@@ -14,12 +14,12 @@ vi.mock("@supabase/supabase-js", () => ({
 import { OFFER_1 } from "@/lib/fixtures/offers";
 import { POST } from "./route";
 
-function post(text: string) {
+function post(text: string, extra: Record<string, unknown> = {}) {
   return POST(
     new Request("http://localhost/api/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, ...extra }),
     }),
   );
 }
@@ -44,20 +44,32 @@ describe("POST /api/check saves an anonymous check", () => {
     expect(insert).toHaveBeenCalledTimes(1);
     const row = insert.mock.calls[0][0];
     expect(row).toEqual({
+      id: json.checkId,
       verdict: json.verdict,
       score: json.score,
       pattern_ids: json.matches.map((m: { id: string }) => m.id),
       simulated: true,
+      repeat_visit: false,
     });
+    expect(json.checkId).toMatch(/^[0-9a-f-]{36}$/);
     expect(row).not.toHaveProperty("text");
     expect(JSON.stringify(row)).not.toContain("uniforme");
   });
 
-  it("still returns 200 with the verdict when the insert fails", async () => {
+  it("saves repeat_visit only when the body says exactly true", async () => {
+    insert.mockReturnValue({ abortSignal: () => Promise.resolve({ error: null }) });
+    await post(OFFER_1, { repeatVisit: true });
+    await post(OFFER_1, { repeatVisit: "true" });
+    expect(insert.mock.calls[0][0].repeat_visit).toBe(true);
+    expect(insert.mock.calls[1][0].repeat_visit).toBe(false);
+  });
+
+  it("still returns 200 with the verdict and checkId null when the insert fails", async () => {
     insert.mockReturnValue({ abortSignal: () => Promise.reject(new Error("insert failed")) });
     const res = await post(OFFER_1);
     expect(res.status).toBe(200);
     const json = await res.json();
+    expect(json.checkId).toBeNull();
     expect(json.verdict).toBe("red");
     expect(json.nextStep).toMatch(/No pagues/);
   });
