@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { EXAMPLE_OFFER as SAMPLE_OFFER } from "@/lib/fixtures/offers";
 import { hasCheckedBefore, markChecked } from "@/lib/send-event";
 import { MAX_CHARS, validateOffer } from "@/lib/validate";
 import ResultView, { type CheckResult } from "./result-view";
 
 // Invented offer 1 from docs/PACKET.md — sample data, not a real offer.
-const EXAMPLE_OFFER =
-  "Vacante en tienda, $35,000 al mes, sin experiencia, contratación HOY. Solo deposita $450 para tu uniforme.";
+// Same text the server uses to flag demo checks (lib/fixtures/offers.ts).
+const EXAMPLE_OFFER = SAMPLE_OFFER;
 
 const NETWORK_ERROR = "No pudimos revisar la oferta. Revisa tu conexión e intenta de nuevo.";
 
@@ -39,7 +40,8 @@ export default function CheckForm() {
         setError(data?.error ?? NETWORK_ERROR);
         return;
       }
-      markChecked();
+      // A demo check doesn't make this browser a returning user.
+      if (validation.text !== EXAMPLE_OFFER) markChecked();
       setResult(data as CheckResult);
       window.scrollTo(0, 0);
     } catch {

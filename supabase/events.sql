@@ -42,7 +42,7 @@ grant insert (check_id, kind, answer) on public.check_events to anon;
 -- Pause rate on checks that matched a money pattern:
 --   select e.answer, count(*) from public.check_events e
 --     join public.checks c on c.id = e.check_id
---    where e.kind = 'intent' and c.pattern_ids && array['upfront_payment']
+--    where e.kind = 'intent' and not c.example and c.pattern_ids && array['upfront_payment']
 --    group by e.answer;
 --
 -- Replies copied per red/yellow check:

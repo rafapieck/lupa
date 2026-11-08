@@ -2,6 +2,7 @@ import { extractSignals } from "@/lib/extract";
 import { loadPatterns } from "@/lib/load-patterns";
 import { saveCheck } from "@/lib/save-check";
 import { scoreSignals } from "@/lib/score";
+import { EXAMPLE_OFFER } from "@/lib/fixtures/offers";
 import { validateOffer } from "@/lib/validate";
 
 // Gemini may take up to GEMINI_TIMEOUT_MS (20 s); give Vercel room to finish.
@@ -43,7 +44,10 @@ export async function POST(request: Request) {
 
   // Never throws; a failed save still returns the verdict (checkId: null, so
   // the browser sends no events for a check that doesn't exist).
-  const checkId = await saveCheck(result, simulated, input?.repeatVisit === true);
+  // Demo checks (the "Probar con un ejemplo" offer) are saved flagged, so they
+  // never count as real users. The text match covers anyone who pastes it.
+  const example = validation.text === EXAMPLE_OFFER;
+  const checkId = await saveCheck(result, simulated, input?.repeatVisit === true, example);
 
   return Response.json(
     { ...result, simulated, checkId },
