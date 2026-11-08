@@ -9,7 +9,9 @@ Lupa is a mobile-first web app that checks whether a job offer looks like a scam
 - one concrete next step ("No pagues nada…")
 - on 🟡/🔴, a polite reply to send the recruiter, with a **Copiar mensaje** button. It's a fixed template from `fraud_patterns.reply_es`, never written by the AI
 
-Lupa does **not** store or log what you paste. After each verdict it saves one anonymous `checks` row (verdict, score, matched pattern IDs, simulated flag, date). There's no offer text, no IP, no user agent and nothing about the user.
+Lupa does **not** store or log what you paste. After each verdict it saves one anonymous `checks` row (verdict, score, matched pattern IDs, simulated flag, a yes/no "this browser checked before", date). There's no offer text, no IP, no user agent and nothing about the user.
+
+After the verdict, an optional card asks **"¿Qué vas a hacer con esta oferta?"** with four fixed answers. Tapping one, or copying the suggested reply, saves one anonymous `check_events` row (check id, kind, answer, date). This is the Week 13 event log: it shows what people *do* after a verdict.
 
 Live at **[lupaempleo.xyz](https://www.lupaempleo.xyz)**. Pages: `/` (checker), `/product` (Cómo funciona), `/about` (Nosotros, with the live "Revisiones esta semana" number).
 
@@ -70,7 +72,8 @@ Never commit real values. `.env*` is git-ignored, except `.env.example`.
 5. Open a new query, paste [`supabase/checks.sql`](supabase/checks.sql), and click **Run**. This creates the `checks` table (verdict, score, matched pattern IDs, simulated flag and date; **no offer text, no user data**), turns RLS on with one policy (`anon` can only `INSERT`), adds a trigger that rejects pattern IDs not in `fraud_patterns`, and creates `checks_this_week()`, the North Star counter. It's idempotent: running it again changes nothing and gives no errors. Run it after `seed.sql`.
 6. Check it: in a new query, run `select public.checks_this_week();`. It should return `0` (or the number of checks so far).
 7. **Projects created before the reply feature:** open a new query, paste [`supabase/reply.sql`](supabase/reply.sql), and click **Run**. It adds the nullable `reply_es` column to `fraud_patterns` and fills in the reply templates. It's safe to re-run. New projects already get the column from `schema.sql` and the replies from `seed.sql`, and running `reply.sql` there changes nothing. Check: `select id, reply_es from public.fraud_patterns;` shows 11 replies.
-8. Go to **Project Settings → API** and copy the Project URL and the `anon` public key into the env vars.
+8. **Week 13 event log:** open a new query, paste [`supabase/events.sql`](supabase/events.sql), and click **Run**. It adds `repeat_visit` to `checks`, lets the server insert its own check `id`, and creates `check_events` (RLS on, anon can only `INSERT` `check_id`, `kind` and a fixed `answer`). It's idempotent. Check: `select count(*) from public.check_events;` returns `0`. **Run it before deploying the Week 13 code**; if the code ships first, saves fail safely (the verdict still shows, the answer card stays hidden).
+9. Go to **Project Settings → API** and copy the Project URL and the `anon` public key into the env vars.
 
 `lib/patterns.ts` holds the same patterns (including `reply_es`) as a local fallback. Until `reply.sql` runs, the Supabase read fails on the missing column and Lupa uses this local copy, so results stay correct. If you change one, change the other: `lib/patterns.test.ts` fails when they get out of sync.
 
@@ -91,6 +94,10 @@ The domain was bought on Porkbun (about US$2 for the first year). `www.lupaemple
 2. Vercel shows the DNS records it needs. In Porkbun → **Domain Management → DNS**, add them: usually an `A` record for the apex pointing to Vercel's IP and a `CNAME` for `www` pointing to Vercel's target. Use the exact values Vercel shows. Remove Porkbun's default parking records if they conflict.
 3. Wait until Vercel marks both domains **Valid Configuration**. HTTPS is issued automatically.
 4. Open `https://www.lupaempleo.xyz`, `/product` and `/about` on a phone, and check that `https://lupaempleo.xyz` redirects to `www`.
+
+## Reading the event log (founder only, SQL editor)
+
+The queries are at the bottom of [`supabase/events.sql`](supabase/events.sql): the pause rate on checks that asked for money (`no_pay` + `verify` answers), replies copied per red/yellow check, and the share of repeat-visit checks. The public API can never read these tables.
 
 ## Test offers
 

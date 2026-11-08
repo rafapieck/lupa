@@ -133,3 +133,28 @@ The plan (PACKET §11) was the free `.me` domain from the GitHub Student Pack (N
 
 - **Free stack:** this is the only paid item, and it's a one-time few dollars. Check the renewal price before next year, and decide then whether to keep `.xyz` or move to the Student Pack domain.
 - **Backlog:** if we later switch domains, add a redirect from the old one so shared links keep working.
+
+## 2026-11-08 — Week 13: anonymous event log (what people do after a verdict)
+
+### Why
+This week Lupa meets real users. A verdict nobody acts on is a screen, not prevention, and the MONEY brief says the number a sponsor buys is "people asked for money who paused". Lupa couldn't see any of that. The stack floor also asks for an analytics/feedback mechanism.
+
+### What
+- **`checks.id` is generated on the server** (`crypto.randomUUID()`) and returned to the browser as `checkId`, only when the row was saved. A failed save returns `checkId: null` and the browser sends no events, so no event can point to a missing check.
+- **`check_events`** (insert-only, RLS on): `check_id`, `kind` (`reply_copied` / `intent`), `answer` (fixed list) and date. A check constraint ties the answer to the kind.
+- **`POST /api/event`** validates the uuid, the kind and the answer against fixed lists; anything else is a 400 and nothing is saved. A database failure still answers 200.
+- **Answer card** "¿Qué vas a hacer con esta oferta?" on every saved verdict, with four fixed answers. After "Voy a seguir" or "Ya había pagado", it shows the 088 / Policía Cibernética line.
+- **`repeat_visit`**: the browser keeps one localStorage flag (`lupa_checked_before = 1`) and sends only a yes/no. It's how a return visit becomes provable without accounts, cookies or IDs.
+
+### Decisions
+- **Fixed answers, never free text.** A text box invites people to paste names, phone numbers or amounts. Four buttons can't leak personal data, and they map directly to the pause rate.
+- **Neutral buttons.** The image-generated mockup made "Voy a seguir con el proceso" a green button. Green reads as "go", so the design would reward the riskiest answer. All four buttons share one neutral style (tested).
+- **`repeat_visit`, not `returning`.** `returning` is a reserved word in Postgres.
+- **One `reply_copied` per result**, however many times they tap, so copies aren't inflated.
+- **Optional and after the advice.** The card sits below "Qué hacer ahora" and the reply box; ignoring it saves nothing and changes nothing.
+
+### Not verified locally
+This session had no package installs, so `npm test`, lint and build didn't run here. The server logic was checked with a stubbed Supabase client. Run `npm test` and `npm run build` before merging, or let the Vercel preview build catch type errors.
+
+### Tomorrow's first move
+Run `supabase/events.sql` in Supabase, merge the Week 13 PR, check on a real phone that tapping an answer adds a row to `check_events`, then run the first 2–3 real-user sessions with `docs/USER_SESSIONS.md`.
