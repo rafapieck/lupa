@@ -1,58 +1,57 @@
-# PACKET — Lupa · Week 12 · The Core Build (venture rebuild)
+# PACKET — Lupa · Week 13 · Real Humans (five users who don't love you)
 
-**Founder:** Rafael Pieck Guerra · **Venture:** Lupa (from Week 9, "The Job Savior", ADVERSARY) · **Repo:** `rafapieck/lupa`
-**Method:** *Proof Before Verdict*. Step 3 of the Method ("the AI reads; something verifiable decides") is the engine.
-**Referee:** `docs/CHARTER.md` · **Personas:** `docs/PERSONAS.md` · **Week 9 packet:** in git history
+**Founder:** Rafael Pieck Guerra · **Venture:** Lupa (Weeks 12–17) · **Repo:** `rafapieck/lupa` · **URL of record:** `www.lupaempleo.xyz`
+**Method:** *Proof Before Verdict*. The AI reads; verified rules decide.
+**Referee:** `docs/CHARTER.md` · **Personas:** `docs/PERSONAS.md` · **Week 12 packet:** in git history
 
-> Packet before code. This file and the Charter were committed before any Week 12 application code.
+> Packet before code. This file was committed before any Week 13 application code.
+> §13 (the #1 real-user pain and its fix) is filled **after** the first real sessions, in its own commit, before the fix is coded.
 
 ---
 
 ## 1. Problem (in my words)
 
-People pushed out of the first job rung look for work in the least protected places: Facebook groups and WhatsApp forwards. That is where scammers wait, asking for money up front ("uniform", "training", "medical exam"), for an INE, or for travel "with housing included". The person decides alone, under time pressure, facing someone who knows exactly what to say, and with nothing to check the offer against. Today they google it and decide on a hunch. Lupa gives them a sourced answer about *their* offer before they pay or hand over documents.
+Lupa already gives a sourced verdict on a pasted job offer. What it can't tell me is whether that verdict changed anything. A green, yellow or red light that nobody acts on is a nice screen, not prevention. This week Lupa leaves the persona lab and meets real job-seekers, and I need two things it doesn't have: a way to see what real people do after the verdict, and the one fix that real people (not my synthetic Jorge) show me matters most.
 
 ## 2. Exact user
 
-The two personas in `docs/PERSONAS.md`:
-- **Karla, 19, Ecatepec.** Lost her call-center job to AI agents. Risk: paying $300–$500 for a fake "uniform".
-- **Jorge, 27, Iztapalapa.** Takes whatever comes. Risk: handing over his INE and traveling to an unknown city.
+Real people looking for entry-level work **right now**, who find offers in Facebook groups and WhatsApp forwards: the population behind Karla (19, Ecatepec) and Jorge (27, Iztapalapa) in `docs/PERSONAS.md`.
 
-**Real person behind the need:** RPM, a member of my family, saw an offer this month in a Facebook group asking for money up front, and could only google it.
+**This week's five:** at least 3 of 5 are strangers to me. Recruited from job-seeker Facebook groups, a job fair and the line at an employment office, not classmates. Each one is recorded by role, never by name.
 
 ## 3. Success definition
 
-> **Before the module closes**, at the venture's real domain (`lupaempleo.xyz`):
-> 1. A visitor pastes a job offer on the home page and, in under 30 seconds, gets a 🟢/🟡/🔴 verdict, each red flag with its official source, and one next step. **The AI only extracts signals; the verdict comes from the verified `fraud_patterns` table and fixed rules.**
-> 2. Every completed check is **saved** as a `check` row (matched pattern IDs, verdict, score, date), with **no offer text and no user data**.
-> 3. The site has `/product` (how it works) and `/about` (the need, who pays, the 10:1 case), plus a public "checks this week" number, which is the North Star.
+> **Before the module closes**, at `www.lupaempleo.xyz`:
+> 1. After every verdict, the visitor can answer **one anonymous tap**: "¿Qué vas a hacer con esta oferta?" The answer is saved as an event linked to that check, with no offer text and no user data.
+> 2. Copying the suggested reply is saved as an event too, so I can see who **acted**, not only who read.
+> 3. Each check records whether this browser had checked before (`returning`), with no ID, cookie or personal data, so a **return visit is provable**.
+> 4. The #1 pain found in the real sessions (§13) is fixed and redeployed, with before/after screenshots.
 
 ## 4. Mockup (image-generated)
 
-![Lupa mockup](mockup.png)
+![Lupa Week 13 mockup](mockup-week13.png)
 
-*Image-generated mockup from Week 9 (paste screen → verdict screen with matched flags, sources and next step). The core loop didn't change, so the mockup still holds.*
+*Image-generated: the red verdict screen, with "Qué hacer ahora" and the "Copiar mensaje" box, followed by a new card that says "¿Qué vas a hacer con esta oferta?" and has four large buttons.*
 
 ## 5. Flow
 
-### 5.1 Flowchart — the core loop
+### 5.1 Flowchart — verdict → action → evidence
 
 ```mermaid
 flowchart TD
-  A[Visitor pastes job offer on home page] --> B{Valid? 20 to 3000 chars}
-  B -- No --> C[Friendly error] --> A
-  B -- Yes --> D[AI extracts signals as JSON only]
-  D -- AI fails --> D2[Keyword fallback, labeled on screen]
-  D --> E[Match signals against fraud_patterns]
-  D2 --> E
-  E --> F[Fixed rules: sum of weights]
-  F --> G{Score}
-  G -- 0 to 2 --> H[Green: no known signals found]
-  G -- 3 to 5 --> I[Yellow: caution]
-  G -- 6 or more --> J[Red: high risk]
-  H & I & J --> K[Show verdict + flags with source + one next step]
-  K --> L[(Save check: pattern IDs, verdict, score, date. No text)]
-  L --> M[checks_this_week counter on /about]
+  A[Visitor pastes offer] --> B[API: AI extracts signals, rules score]
+  B --> C[Save check: verdict, score, pattern IDs, simulated, returning]
+  C --> D[Show verdict + flags + next step]
+  D --> E{Yellow or red?}
+  E -- Yes --> F[Show reply box]
+  F --> G[Visitor taps Copiar mensaje]
+  G --> H[(Event: reply_copied)]
+  E -- No --> I
+  F --> I[Card: Que vas a hacer con esta oferta?]
+  I --> J[Taps one answer]
+  J --> K[(Event: intent + answer)]
+  K --> L[Thank-you line, card closes]
+  I -- Ignores card --> M[Nothing saved, nothing blocked]
 ```
 
 ### 5.2 Swimlane — who does what
@@ -61,89 +60,109 @@ flowchart TD
 flowchart LR
   subgraph U[Job seeker]
     U1[Pastes offer]
-    U2[Reads verdict and next step]
+    U2[Reads verdict]
+    U3[Copies reply or taps an answer]
   end
   subgraph APP[Lupa site]
-    A1[Validates input]
-    A2[Shows verdict, sources, next step]
+    A1[Marks returning if this browser checked before]
+    A2[Shows verdict and the answer card]
+    A3[Sends event: check id + kind + answer]
   end
-  subgraph SRV[Server route /api/check]
-    S1[Sends text to AI]
-    S2[Rules: match + score]
-    S3[Inserts check row without text]
+  subgraph SRV[Server routes]
+    S1[/api/check: AI reads, rules decide, saves check, returns check id/]
+    S2[/api/event: validates kind and answer against fixed lists/]
   end
   subgraph AI[Gemini]
-    L1[Returns signals JSON]
+    L1[Signals JSON only]
   end
   subgraph DB[Supabase]
-    D1[(fraud_patterns: read-only)]
-    D2[(checks: insert-only)]
+    D1[(checks: insert-only)]
+    D2[(check_events: insert-only)]
   end
-  subgraph ADM[Founder]
-    R1[Loads verified patterns via SQL]
+  subgraph F[Founder]
+    R1[Reads totals in SQL editor for the sessions log and the brief]
   end
-  U1 --> A1 --> S1 --> L1 --> S2
-  R1 --> D1 --> S2
-  S2 --> S3 --> D2
-  S2 --> A2 --> U2
+  U1 --> A1 --> S1 --> L1 --> S1
+  S1 --> D1
+  S1 --> A2 --> U2 --> U3 --> A3 --> S2 --> D2
+  D1 --> R1
+  D2 --> R1
 ```
 
 ## 6. Benchmark
 
-**The best existing solution on Earth for this is** Norton Genie, a general AI scam detector for messages, links and screenshots.
-**Mine differs or localizes by** being built only for Mexican job offers: Karla's and Jorge's Spanish, a verdict from verified patterns taken from Mexican official alerts instead of an AI's opinion, every flag with its source, and a Mexican next step (don't pay, verify the company, report to 088 / Policía Cibernética).
+**The best existing solution on Earth for this is** Singapore's ScamShield: a free government app and helpline where anyone checks a suspicious message in one tap, and reports flow back to the police.
+**Mine differs or localizes by** closing the loop on the *job-seeker's decision*: instead of only checking, Lupa records (anonymously) whether the person paused before paying, with Mexican job-scam patterns, Mexican sources and no State behind it yet.
 
 ## 7. Long view (3 years)
 
-If this core works, Lupa becomes the trust layer of informal job searching in Mexico: a WhatsApp number where anyone forwards a suspicious offer and gets a sourced answer in seconds. The anonymous checks become a living map of active scams by city and platform, shared with job seekers, schools and the Policía Cibernética. It is funded by public and NGO sponsors (employment programs, foundations, crime prevention), never by employers and never by the job seeker, so no payer can ever buy a verdict.
+If this slice works, Lupa stops counting checks and starts counting **pauses**: how many people were asked for money and didn't pay. That number becomes the product a sponsor buys: job boards losing applicants to fear, banks and fintechs handling fraud claims, and public employment programs. With it, Lupa becomes the WhatsApp number people forward offers to, and its anonymous pause data becomes the map of where job scams are active this week.
 
-## 8. Who pays (for /about)
+## 8. Who pays (updated after the Week 13 MONEY brief)
 
-**Public and NGO sponsors**, such as government employment programs, foundations working on youth employment, and crime-prevention programs, fund Lupa as prevention. The job seeker never pays. Employers can't pay, so a verdict can never be bought (Charter non-goals). *This week it's a stated model, not a signed sponsor.*
+The job seeker never pays, and no employer can buy a verdict (Charter). Payers, ordered by incentive: **job boards** (they lose applicants to doubt), **banks and fintechs** (they absorb the fraud claims), then **public employment programs**. The number every payer buys is the same: detected money requests where the person did not pay. *Open question: what one fraud claim costs a Mexican bank to handle.*
 
 ## 9. Blueprint conditions honored (incl. shadow clause)
 
-*To be completed after this week's Team Bending session, with the conditions and the risk register (one risk + one strength from each teammate).*
-
 | Condition | How Lupa honors it |
 |---|---|
-| *(from the Blueprint)* | |
-| **Charter principles carried in by me:** AI never decides · every flag has a source · never "safe" · always a next step · no text or user data stored | Rules-only verdict in `lib/score.ts`; `checks` table has no text column; copy audit for "segura" |
+| **Shadow clause: false validation.** A product that looks proven because testers were polite; for Lupa, a false "safe" lends a scammer my credibility | Lupa never says "safe" (copy audit test). Sessions count only **behaviors** (a copy, an answer, a return), never "I liked it". The sponsor number counts only money requests not paid, never visits or total checks |
+| **Forbidden zone:** no friends-and-family-only testing | 3 of 5 users are strangers; recruiting channel logged per session |
+| **AI never decides** | Unchanged: rules-only verdict in `lib/score.ts` |
+| **No text or user data stored** | `check_events` holds only check id, kind, answer and date. `returning` is a yes/no computed in the browser; no ID, cookie or fingerprint is sent |
 
 ## 10. Scope cut — NOT building this week
 
-- ❌ WhatsApp bot, image/screenshot reading, scam map (3-year vision)
-- ❌ User accounts or login: nothing personal is stored, so no auth is needed (security floor)
-- ❌ Company verification (RFC/SAT lookups), employer badges, job listings (forbidden zone)
-- ❌ Admin panel: patterns are still loaded from the SQL editor
-- ❌ Any feature beyond the core loop (my blind spot is over-scoping)
+- ❌ WhatsApp bot and screenshot reading (3-year vision), even though it's my timing hypothesis. It only enters this week if the real sessions rank it #1 *and* it fits one fix
+- ❌ Accounts, login, email capture or any way to contact the user
+- ❌ A public dashboard of events. The founder reads totals in the SQL editor
+- ❌ Free-text feedback (it would invite personal data). Fixed answers only
+- ❌ More than one fix from the sessions (one fix per round, per the Charter)
 
 ## 11. Architecture + stack
 
 | Layer | Tool | Notes |
 |---|---|---|
 | Site | Next.js (App Router) + Tailwind | `/` checker · `/product` · `/about` |
-| Hosting + domain | Vercel + lupaempleo.xyz (Porkbun, ~US$2 first year) | Real domain is the URL of record |
-| AI | Google Gemini Flash (free tier) | Extracts signals only; keyword fallback labeled on screen |
-| Verified data | Supabase `fraud_patterns` | RLS ON, public read-only |
-| Saved checks | Supabase `checks` | RLS ON, **insert-only** for the server; no public read |
-| North Star | `checks_this_week()` SQL function (security definer) | Returns one number, never rows |
+| Hosting + domain | Vercel + `www.lupaempleo.xyz` | URL of record |
+| AI | Google Gemini Flash Lite (free tier) | Extracts signals only; keyword fallback labeled on screen |
 | Rules | `lib/score.ts` | Deterministic, tested |
+| Saved checks | Supabase `checks` | RLS ON, insert-only. **New:** server-generated `id` returned to the browser, and a `returning` boolean |
+| **New: event log** | Supabase `check_events` | RLS ON, insert-only. Columns: `id`, `created_at`, `check_id` (FK to checks), `kind` (`reply_copied` / `intent`), `answer` (fixed list or null) |
+| **New: event route** | `POST /api/event` | Validates check id (uuid), kind and answer against fixed lists; never blocks the UI |
 | Secrets | Vercel env vars only | |
 
-**New table `checks`:** `id` (uuid), `created_at` (timestamptz), `verdict` (`green` / `yellow` / `red`), `score` (int 0–100), `pattern_ids` (text[], each must exist in `fraud_patterns`), `simulated` (bool). **No offer text, no IP, no user agent.**
+**Intent answers (fixed list):** `no_pay` "No voy a pagar ni mandar documentos" · `verify` "Primero voy a verificar la empresa" · `continue` "Voy a seguir con el proceso" · `already_paid` "Ya había pagado o mandado documentos".
+
+**What the founder can count (SQL editor):** checks with a money pattern matched → share with an `intent` event → share answering `no_pay` or `verify` (the "pause rate") · `reply_copied` per red/yellow check · share of `returning` checks.
 
 ## 12. Test plan
 
 **Mechanical pass**
-1. The 5 invented offers from Week 9 still return 🔴🔴🔴🟢🟡.
-2. Each check inserts exactly one `checks` row with no text; confirm in Supabase that no column holds the offer.
-3. The anon key cannot `select` from `checks` (RLS), and cannot insert a row with a fake verdict outside the enum.
-4. `checks_this_week()` returns a number that goes up by 1 after a check.
-5. If the save fails, the user still sees the verdict (saving never blocks the answer).
-6. `/product` and `/about` load at the real domain; `/about` states the need, who pays and the 10:1 case.
-7. Copy audit: no user-facing text says "segura" or "es real".
-8. Security floor: `git grep` for keys returns nothing; inputs are validated on client and server.
-9. Find at least one bug, fix it, redeploy, and log it in DECISIONS.md.
+1. The 5 invented offers still return 🔴🔴🔴🟢🟡, and the prompt-injection offer stays 🔴.
+2. `/api/check` returns a `checkId` (uuid) and saves exactly one row with that id; the row has no text.
+3. `/api/event` accepts only a valid uuid, a known `kind`, and for `intent` only one of the 4 answers; anything else → 400, nothing saved.
+4. Anon key cannot `select`, `update` or `delete` `check_events` (RLS); an event for a non-existent check id is rejected by the foreign key.
+5. Tapping an answer shows the thank-you line even if the save fails (saving never blocks the UI).
+6. `returning` is false on the first check in a fresh browser and true on the second; nothing else about the browser is sent.
+7. Copy audit still passes: no "segura" / "es real" in any new text.
+8. Security floor: no keys in the repo (`git grep`), inputs validated on client and server, RLS on both tables.
+9. Find at least one bug, fix it, redeploy, log it in `DECISIONS.md`.
 
-**Persona pass (Layer 1):** fresh chat as **Jorge** (the new persona), with screenshots of home → result → /about. Log every hesitation, fix the worst one, and save as `PERSONA_RafaelPieck.pdf`.
+**Real-user pass (Layer 2):** 5 sessions logged in `docs/USER_SESSIONS.md`: role, recruiting channel, stranger yes/no, what they tried, where they struggled, exact quotes, and what they did (copied, answered, returned). Pain ranking: the 3 worst findings, ordered by how much they threaten the 10:1 case.
+
+**Persona pass (Layer 1):** fresh chat as a persona built from the real users, walking home → result → answer card. Log every hesitation, fix the worst one, and save as `PERSONA_RafaelPieck.pdf`.
+
+## 13. #1 real-user pain and fix
+
+*Filled after the first real sessions, committed before the fix is coded.*
+
+**Hypothesis going in (from my MONEY brief):** timing, not accuracy. People paste an offer when curious, not at the moment a recruiter demands money, so the check arrives after the deposit. **The real users outrank this hypothesis.**
+
+| | |
+|---|---|
+| Pain #1 (from sessions) | |
+| Who showed it + exact quote | |
+| Why it threatens the 10:1 case | |
+| The fix (one feature) | |
+| Before / after evidence | |
