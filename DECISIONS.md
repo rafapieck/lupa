@@ -221,3 +221,12 @@ Demo checks saved before this fix stay unflagged. They're few and from today; ma
 - **Routes today:** `/` (check form + result), `/product` (Cómo funciona), `/about` (Nosotros: need, Hoy vs. con Lupa, Quién paga, "Revisiones esta semana"), `POST /api/check`, `POST /api/event`. Header nav: Revisar oferta · Cómo funciona · Nosotros; shared footer in the layout. **`/pricing` does not exist. `/about` already exists**, so F4 must fold the 10:1 memo into it rather than create it.
 - **Secrets:** none found. `.gitignore` has `.env*` with `!.env.example`; `.env.example` holds names only. A search for `service_role`, `sk-`, `AIza`, JWT-shaped strings and long base64 found only mentions in `docs/PACKET.md` prose. No `.env` file was ever committed.
 - **Vercel preview URL pattern:** not recorded in the repo; Rafael to confirm in Vercel → project → Deployments (preview URLs) before M3 step 4.
+
+## 2026-11-14 — F1: simulator logic (`lib/pricing/simulate.ts`)
+
+- Pure module: `validateInputs`, `validateScenarioName`, `simulate`, `DEFAULTS` (value + label: inventado / supuesto / precio de lista), `FIELD_SPECS`, `FORMULA_VERSION = 1`. No I/O, React or Supabase.
+- **Paying institutions use integer basis points** (`Math.floor(pipeline × round(rate × 100) / 10000)`), so `floor` never lands on 0.9999… from float error. A test covers 100 × 7% = 7.
+- **A negative number gets the range message** ("Debe estar entre 0 y …") instead of "Escribe un número", because the person did type a number. Scientific notation, `+5`, `.5`, `1.`, `5%` and `$5` get "Escribe un número".
+- **One extra error message** the prompt didn't list: "Usa máximo N decimales" for a decimal field with too many decimals (e.g. cost per check `0.00001`). The three listed messages didn't fit that case.
+- Range numbers in errors use commas ("Debe estar entre 0 y 10,000,000"), matching the money format.
+- Tests: `lib/pricing/simulate.test.ts` covers Cases 1–3, every §12b validation row that doesn't need the DB, and scenario names. Suite: `Test Files  18 passed (18) · Tests  150 passed (150)`.
