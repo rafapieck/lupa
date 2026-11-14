@@ -238,3 +238,13 @@ Demo checks saved before this fix stay unflagged. They're few and from today; ma
 - **"En desarrollo" tag** on the two Campus/Programa features that aren't built (vacancy checks with monthly alert, state dashboard), plus a note under the cards: "Hoy no cobramos: estos precios son nuestra propuesta para instituciones." PACKET §8: nothing on the page may imply those are live. The monthly aggregated report has no tag: the first pilot report is assembled by hand (§8), so it can be delivered.
 - **Each card has a small "free" line** (PACKET §12d: every tier card states that checking an offer is free). Programa's line also says "agregado por estado y canal, nunca datos de una persona" (§12d).
 - Verified locally on the production build: `/pricing` and `/` render at 390px with `scrollWidth = 390` (no horizontal scroll), and "Probar con un ejemplo" returns 🔴 with no sign-in.
+
+## 2026-11-14 — F3: revenue simulator on `/pricing`
+
+- Client component `app/pricing/simulator.tsx`, below the tiers. Each keystroke runs `validateInputs` → `simulate`. While any field is invalid, that field shows its inline error (red border, `aria-invalid`) and the results keep the last valid set of inputs.
+- Display rounding only in `lib/pricing/format.ts`: money `$15,500.00`, negatives with a real minus sign (`−$2,500.00`) and red text, margin % to one decimal, "—" when revenue is 0.
+- **Extra line "Instituciones que pagan: 4 Campus · 1 Programa"** under the results, so the round-down rule is visible (Case 3 shows 1 · 0).
+- Inputs are `type="text"` with `inputmode` (`numeric` for integers, `decimal` otherwise) so "24,000" can be typed with its comma; `type="number"` would reject commas on iOS.
+- The review-cost label reads "Costo de revisar cada reporte" (plus "opcional"), which says what the cost is for better than "Costo por reporte".
+- Verified in a browser on the production build at 390px: defaults show $15,500.00 / $500.00 / $15,000.00 (96.8%) / 200; typing 101 in conversion shows "Debe estar entre 0 y 100" and the results stay; no horizontal scroll. Cases 2 and 3 typed by hand in `app/pricing/simulator.test.tsx`.
+- Suite: `Test Files  20 passed (20) · Tests  168 passed (168)`.

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Simulator from "./simulator";
 import { NEVER_PAYWALLED, PRICES_NOTE, PRICING_SUBTITLE, PRICING_TITLE, SOON_LABEL, TIERS } from "./tiers";
 
 export const metadata: Metadata = {
@@ -67,6 +68,8 @@ export default function PricingPage() {
           para instituciones.
         </p>
       </div>
+
+      <Simulator />
     </main>
   );
 }
