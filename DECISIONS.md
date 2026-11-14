@@ -230,3 +230,11 @@ Demo checks saved before this fix stay unflagged. They're few and from today; ma
 - **One extra error message** the prompt didn't list: "Usa máximo N decimales" for a decimal field with too many decimals (e.g. cost per check `0.00001`). The three listed messages didn't fit that case.
 - Range numbers in errors use commas ("Debe estar entre 0 y 10,000,000"), matching the money format.
 - Tests: `lib/pricing/simulate.test.ts` covers Cases 1–3, every §12b validation row that doesn't need the DB, and scenario names. Suite: `Test Files  18 passed (18) · Tests  150 passed (150)`.
+
+## 2026-11-14 — F2: `/pricing` tiers page
+
+- Static server page `app/pricing/page.tsx`; copy lives in `app/pricing/tiers.ts` so tests read the same strings.
+- **"Precios" link goes in the footer**, not the header. The header already wraps to two lines at 390px with three links; a fourth would push the check form further down.
+- **"En desarrollo" tag** on the two Campus/Programa features that aren't built (vacancy checks with monthly alert, state dashboard), plus a note under the cards: "Hoy no cobramos: estos precios son nuestra propuesta para instituciones." PACKET §8: nothing on the page may imply those are live. The monthly aggregated report has no tag: the first pilot report is assembled by hand (§8), so it can be delivered.
+- **Each card has a small "free" line** (PACKET §12d: every tier card states that checking an offer is free). Programa's line also says "agregado por estado y canal, nunca datos de una persona" (§12d).
+- Verified locally on the production build: `/pricing` and `/` render at 390px with `scrollWidth = 390` (no horizontal scroll), and "Probar con un ejemplo" returns 🔴 with no sign-in.
