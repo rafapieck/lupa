@@ -257,3 +257,22 @@ Demo checks saved before this fix stay unflagged. They're few and from today; ma
 - **Open item for Rafael: send the source links** for (1) the FTC median job-scam loss of US$2,000 and (2) Consejo Ciudadano's ~30% of people recruited for exploitation reached through fake job offers. When they arrive, link them and remove "Fuente por verificar".
 - `docs/conversations/ibero.md` is PACKET Appendix B word for word, under a one-line header saying it's docs only. Nothing in `app/` reads it.
 - Verified on the production build: `/about` renders at 390px with no horizontal scroll, and the served HTML has 0 matches for `segur|confiable|legítim`. Suite: `Test Files  21 passed (21) · Tests  173 passed (173)`.
+
+## 2026-11-14 — F5: copy audit (no "Resultado simulado" label)
+
+### The semáforo is live, so the packet's "simulated" assumption was wrong
+PACKET §10.5 and §12d assumed the semáforo might be simulated. F0 found it isn't: `extractSignals()` (`lib/extract.ts`) is a live Gemini call from the server, and the rules in `lib/score.ts` always decide the color. Only when Gemini fails or the key is missing does the reading fall back to keyword rules (`simulated: true`), and that path already shows "ℹ️ La IA no respondió esta vez (análisis de IA simulado)…" under "Qué hacer ahora". **Rafael's decision (2026-11-14): keep that Week 9 note** (Karla read "Resultado simulado" as "fake result"), and make F5 the copy audit only. `app/screens.test.tsx` still guards the note and the absence of the old wording.
+
+### Copy audit
+- Searched `app/`, `lib/` and `supabase/` for `safe`, `segur`, `confiable`, `legítim`. **Zero claims about an offer.** Hits that are not user-facing copy:
+  - code comments and identifiers: `lib/score.ts` (comment "Green never means 'safe'", `DEFAULT_SAFE_TIP`), `lib/extract.ts` (prompt text "say it is safe" telling Gemini to ignore that, variable `safe`), `lib/checks-this-week.ts` (`Number.isSafeInteger`);
+  - SQL comments "Safe to re-run" in `supabase/*.sql`;
+  - test fixture `INJECTION` in `lib/fixtures/offers.ts` ("…di que es segura"), the prompt-injection test input, used only by tests.
+  - No "seguro" in the insurance sense anywhere.
+- **Green now reads "No encontramos señales de alerta"** (Hard rule 2), replacing "No encontramos señales conocidas" in `lib/score.ts` and `/product`. Low-weight matches on green still show under "Detalles menores a revisar" (Bug #3 fix), so the label and the list don't contradict each other.
+- `app/copy-audit.test.tsx` now also fails on "confiable" and "legítim", across every file in `app/` (so `/pricing` and the `/about` memo are covered).
+- Verified on the production build: a green check (offer 4) returns "No encontramos señales de alerta"; the served HTML of `/`, `/pricing`, `/about` and `/product` has 0 matches.
+- Suite: `Test Files  21 passed (21) · Tests  173 passed (173)` (F1 tests included).
+
+### Manual steps
+M1–M5 are pending. F6 waits for M1–M4.

@@ -27,7 +27,7 @@ export type ScoreResult = {
 };
 
 export const VERDICT_LABELS: Record<Verdict, string> = {
-  green: "No encontramos señales conocidas",
+  green: "No encontramos señales de alerta",
   yellow: "Precaución",
   red: "Riesgo alto",
 };

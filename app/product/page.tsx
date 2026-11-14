@@ -26,7 +26,7 @@ const VERDICTS = [
   { emoji: "🟡", label: "Precaución", body: "Tiene alguna señal. Confirma antes de seguir." },
   {
     emoji: "🟢",
-    label: "No encontramos señales conocidas",
+    label: "No encontramos señales de alerta",
     body: "No tiene las señales que conocemos. Eso no garantiza nada: igual confirma que la empresa existe y nunca pagues por adelantado.",
   },
 ] as const;

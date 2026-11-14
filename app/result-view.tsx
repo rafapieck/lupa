@@ -16,7 +16,7 @@ export const SIMULATED_NOTE =
   "ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual.";
 
 // A green verdict can still carry low-weight matches (score 1–2). Calling them
-// "señales de alerta encontradas" under "No encontramos señales conocidas"
+// "señales de alerta encontradas" under the green label
 // contradicted the label, so on green they are shown as minor details.
 export const GREEN_DETAILS_TITLE = "Detalles menores a revisar";
 

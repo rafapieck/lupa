@@ -7,8 +7,9 @@ import { OFFER_4 } from "@/lib/fixtures/offers";
 import { keywordSignals } from "@/lib/keywords";
 import ResultView, { GREEN_DETAILS_TITLE } from "./result-view";
 
-// Charter principle 3: Lupa never says an offer is safe or real.
-const FORBIDDEN = /segur[ao]s?|es real/i;
+// Charter principle 3 + PACKET §10.1: Lupa never says an offer is safe, real,
+// trustworthy or legitimate.
+const FORBIDDEN = /segur[ao]s?|es real|confiable|leg[ií]tim/i;
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -26,14 +27,14 @@ describe("copy audit: green never claims an offer is safe", () => {
   ];
 
   it.each(files.map((f) => [path.relative(path.resolve(__dirname, ".."), f), f]))(
-    '%s has no "segura" or "es real"',
+    '%s has no "segura", "es real", "confiable" or "legítima"',
     (_rel, file) => {
       expect(readFileSync(file, "utf8")).not.toMatch(FORBIDDEN);
     },
   );
 
-  it("labels green as 'No encontramos señales conocidas'", () => {
-    expect(VERDICT_LABELS.green).toBe("No encontramos señales conocidas");
+  it("labels green as 'No encontramos señales de alerta'", () => {
+    expect(VERDICT_LABELS.green).toBe("No encontramos señales de alerta");
   });
 
   it("always shows the safe tip with a green verdict", () => {
@@ -42,7 +43,7 @@ describe("copy audit: green never claims an offer is safe", () => {
     const html = renderToStaticMarkup(
       <ResultView result={{ ...result, simulated: false }} isExample={false} onReset={() => {}} />,
     );
-    expect(html).toContain("No encontramos señales conocidas");
+    expect(html).toContain("No encontramos señales de alerta");
     expect(html).toContain(DEFAULT_SAFE_TIP);
     expect(html).not.toMatch(FORBIDDEN);
   });
