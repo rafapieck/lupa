@@ -248,3 +248,12 @@ Demo checks saved before this fix stay unflagged. They're few and from today; ma
 - The review-cost label reads "Costo de revisar cada reporte" (plus "opcional"), which says what the cost is for better than "Costo por reporte".
 - Verified in a browser on the production build at 390px: defaults show $15,500.00 / $500.00 / $15,000.00 (96.8%) / 200; typing 101 in conversion shows "Debe estar entre 0 y 100" and the results stay; no horizontal scroll. Cases 2 and 3 typed by hand in `app/pricing/simulator.test.tsx`.
 - Suite: `Test Files  20 passed (20) · Tests  168 passed (168)`.
+
+## 2026-11-14 — F4: 10:1 memo on `/about` + Ibero record
+
+- **The memo joins the existing `/about`** (Rafael's call after F0), as a new section after "Quién paga" (`app/about/memo.tsx`), with a link to `/pricing`. The rest of the page is unchanged.
+- **Translation choices.** "safe" in the memo's last paragraph became "de fiar" ("Lupa nunca le dice a nadie que una oferta es de fiar"), and "physical safety" became "integridad física", so the page has no "segur" at all. Gendered examples ("a student who…") became "alguien que…". The reviewer note to Rafael inside the draft was left out.
+- **Sources are named, not linked:** FTC and Consejo Ciudadano, each figure followed by "(Fuente por verificar)" in small text. The $18 MXN per dollar rate is labeled "tipo de cambio supuesto". A test fails if `memo.tsx` contains any URL.
+- **Open item for Rafael: send the source links** for (1) the FTC median job-scam loss of US$2,000 and (2) Consejo Ciudadano's ~30% of people recruited for exploitation reached through fake job offers. When they arrive, link them and remove "Fuente por verificar".
+- `docs/conversations/ibero.md` is PACKET Appendix B word for word, under a one-line header saying it's docs only. Nothing in `app/` reads it.
+- Verified on the production build: `/about` renders at 390px with no horizontal scroll, and the served HTML has 0 matches for `segur|confiable|legítim`. Suite: `Test Files  21 passed (21) · Tests  173 passed (173)`.

@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import ChecksThisWeek from "./checks-this-week";
+import TenToOneMemo from "./memo";
 
 export const metadata: Metadata = {
   title: "Nosotros — Lupa 🔍",
-  description: "Por qué existe Lupa, quién la paga y cuántas ofertas se revisan cada semana.",
+  description: "Por qué existe Lupa, quién la paga, por qué es gratis para quien busca trabajo y cuántas ofertas se revisan cada semana.",
 };
 
 export default function AboutPage() {
@@ -62,6 +63,8 @@ export default function AboutPage() {
           Hoy todavía no tenemos patrocinadores: Lupa es gratis y funciona con herramientas gratuitas.
         </p>
       </section>
+
+      <TenToOneMemo />
 
       <Link
         href="/"
