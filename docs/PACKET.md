@@ -87,6 +87,8 @@ margin_pct         = monthly_margin ÷ monthly_revenue   (shown as "—" when re
 
 ## 4. Mockup: image-generation prompt
 
+![Mockup /pricing + simulador](mockup-week14.jpg)
+
 > A high-fidelity mobile app screenshot, iPhone-size portrait (390×844), of a Spanish-language web page for a Mexican job-fraud checker called "Lupa". Clean, trustworthy civic-tech style: white background, deep navy text (#1B2A41), one accent color of warm amber (#F2A900), soft gray cards with 12px rounded corners, generous spacing, a simple sans-serif font like Inter. No stock photos and no people. One small magnifying-glass logo next to the word "Lupa" in the top-left corner, with a hamburger menu on the right.
 >
 > **Top section**, title: "Precios". Subtitle: "Revisar una oferta de empleo siempre es gratis. Las instituciones pagan para cubrir sus bolsas de trabajo."

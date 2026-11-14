@@ -201,3 +201,23 @@ After deploy 3, a demo check at 15:40 (CDMX) was saved with `example = TRUE` (`d
 
 ### Old rows
 Demo checks saved before this fix stay unflagged. They're few and from today; mark them by hand if needed.
+
+## 2026-11-14 — Week 14 · Pricing, F0: repo findings
+
+### Decisions
+- **One decisions log, at the repo root.** The implementation prompt says `docs/DECISIONS.md`, but the project already keeps its log in `DECISIONS.md` at the root (Weeks 9–13). Week 14 entries go here, so there's one history, not two.
+- **Env-var prefix: `NEXT_PUBLIC_`** (Next.js). Week 14 reuses the existing `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; no new variable names are needed for Google sign-in (the Google client secret lives only in Supabase).
+- **Mockup renamed** `docs/MOCKUP.JPG` → `docs/mockup-week14.jpg` (`git mv`) and embedded under PACKET §4. No other packet change.
+- **`docs/IMPLEMENTATION_PROMPT.md`** replaced with the Week 14 prompt.
+
+### Findings
+- **Framework:** Next.js 16.4.3, App Router (`app/`), React 19.3.0, TypeScript, `cacheComponents: true`. Package manager npm (`package-lock.json`). Styling Tailwind CSS v4 (`@import "tailwindcss"` via `@tailwindcss/turbopack`). Test runner exists: Vitest 3.2.7 with jsdom; `npm test` = `vitest run`, 17 files / 133 tests pass at F0. `AGENTS.md` warns this Next.js has breaking changes: read `node_modules/next/dist/docs/` before writing routes.
+- **Where the semáforo comes from:** `POST /api/check` (`app/api/check/route.ts`) calls `extractSignals()` in `lib/extract.ts`, then `scoreSignals()` in `lib/score.ts`. Extraction is a **live Gemini call from the server** (`@google/genai`, `GEMINI_API_KEY`, model `GEMINI_MODEL` or `gemini-flash-latest`; production uses `gemini-flash-lite-latest`). The verdict is always decided by rules (`lib/score.ts`: signals × pattern weights, bands 0–2 / 3–5 / 6+). It is **simulated only on fallback**:
+  - `if (!apiKey) return { signals: keywords, simulated: true };`
+  - `return { signals: mergeWithGuard(ai, keywords), simulated: false };` on success
+  - `catch (err) { … return { signals: keywords, simulated: true }; }`
+  - When `simulated` is true, `app/result-view.tsx` already shows a note: "ℹ️ La IA no respondió esta vez (análisis de IA simulado)…". **Conflict for F5:** that wording replaced "Resultado simulado" after the Week 9 persona test (Karla read it as "fake result"), and `app/screens.test.tsx` asserts the text "Resultado simulado" does *not* appear. Needs Rafael's call before F5.
+- **Supabase:** no shared client file. `createClient` from `@supabase/supabase-js` is called inline (server side) in `lib/load-patterns.ts`, `lib/save-check.ts`, `lib/save-event.ts` and `lib/checks-this-week.ts`, each reading `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. No `@supabase/ssr`, no auth yet. `fraud_patterns` is read by `loadPatterns()`: `select("id, signal, weight, label_es, next_step_es, source, reply_es")`, 5 s timeout, 5 min in-memory cache, falls back to `LOCAL_PATTERNS` (`lib/patterns.ts`) on any error. Other tables: `checks`, `check_events` (insert-only for `anon`). F6 will need `@supabase/ssr` for the OAuth callback (server-rendered framework).
+- **Routes today:** `/` (check form + result), `/product` (Cómo funciona), `/about` (Nosotros: need, Hoy vs. con Lupa, Quién paga, "Revisiones esta semana"), `POST /api/check`, `POST /api/event`. Header nav: Revisar oferta · Cómo funciona · Nosotros; shared footer in the layout. **`/pricing` does not exist. `/about` already exists**, so F4 must fold the 10:1 memo into it rather than create it.
+- **Secrets:** none found. `.gitignore` has `.env*` with `!.env.example`; `.env.example` holds names only. A search for `service_role`, `sk-`, `AIza`, JWT-shaped strings and long base64 found only mentions in `docs/PACKET.md` prose. No `.env` file was ever committed.
+- **Vercel preview URL pattern:** not recorded in the repo; Rafael to confirm in Vercel → project → Deployments (preview URLs) before M3 step 4.
