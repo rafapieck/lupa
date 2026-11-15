@@ -299,3 +299,16 @@ M1–M5 are pending. F6 waits for M1–M4.
 - The offer check (`/api/check`) wasn't touched and needs no sign-in.
 - **Pending (Rafael, live):** sign in with Google on `www.lupaempleo.xyz/pricing`, return with the inputs intact, sign out.
 - Suite: `Test Files  22 passed (22) · Tests  182 passed (182)`.
+
+## 2026-11-15 — F7: save, load and delete own scenarios
+
+- **"Guardar escenario"** opens a name field (`validateScenarioName`: 1–60 characters after trimming). Saving runs `validateInputs` again and inserts **inputs only** plus `formula_version` (`lib/pricing/scenario-row.ts`). **`user_id` is never sent**: the column default `auth.uid()` fills it, and the insert policy checks it.
+- **Signed out, "Guardar escenario" starts Google sign-in**, remembering that the user wanted to save. Back on `/pricing`, the inputs are restored and the name field is already open.
+- **"Mis escenarios"** lists the signed-in user's rows, newest first (`order created_at desc`), with name and date (es-MX). **Cargar** fills the inputs, and the outputs are recomputed by `simulate()`; nothing computed is ever read from the DB. Numeric columns may arrive as strings ("0.0500"), so they go through `validateInputs` like typed text.
+- **Borrar** asks in the page ("¿Borrar este escenario? No se puede deshacer." · Sí, borrar · Cancelar), never `window.confirm`. Delete is `eq("id", …)` under the user's session, so RLS limits it to the user's own rows.
+- **Errors:** a failed save shows "No se pudo guardar. Tus datos siguen en pantalla." and keeps the inputs; a failed list or delete has its own message.
+- Names render through React text nodes (never `dangerouslySetInnerHTML`); a test renders `<img onerror>` as a name and finds no `<img>`.
+- **Signing out clears the list and the name field from the screen** (PACKET §12c #10).
+- Verified in a browser on a production build with a stubbed Supabase backend (390px, no horizontal scroll): the insert body is exactly the 9 inputs + name + `formula_version: 1`; Cargar after changing a field brings back $15,500.00; the delete prompt appears in the page. `.next/static` has no `service_role`.
+- **Pending (Rafael, live): M5 and RLS checks 5–10 from PACKET §12c.** Steps in `/mnt/project-files/lupa/M5_RLS_CHECK.md`.
+- Suite: `Test Files  23 passed (23) · Tests  195 passed (195)`.
