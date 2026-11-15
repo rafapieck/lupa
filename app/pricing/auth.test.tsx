@@ -45,8 +45,8 @@ afterEach(() => {
 });
 
 describe("F6: Google sign-in on /pricing", () => {
-  it("redirects back to this origin's /pricing, never the shared Site URL", () => {
-    expect(redirectTarget("https://www.lupaempleo.xyz")).toBe("https://www.lupaempleo.xyz/pricing");
+  it("redirects back to this origin's simulator page, never the shared Site URL", () => {
+    expect(redirectTarget("https://www.lupaempleo.xyz")).toBe("https://www.lupaempleo.xyz/pricing/simulador");
   });
 
   it("signed out: shows the Google button; tapping it keeps the inputs and asks Google to return to /pricing", async () => {
@@ -56,7 +56,7 @@ describe("F6: Google sign-in on /pricing", () => {
     await act(async () => button(SIGN_IN_LABEL)!.click());
     expect(fake.signInWithOAuth).toHaveBeenCalledWith({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/pricing` },
+      options: { redirectTo: `${window.location.origin}/pricing/simulador` },
     });
     const pending = JSON.parse(sessionStorage.getItem("lupa_pricing_pending")!);
     expect(pending.raw.checksPerMonth).toBe("50,000");

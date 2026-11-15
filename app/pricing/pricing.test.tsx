@@ -2,7 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import SiteFooter from "../site-footer";
 import PricingPage from "./page";
-import { NEVER_PAYWALLED, PRICES_NOTE, PRICING_SUBTITLE, SOON_LABEL, TIERS } from "./tiers";
+import SimuladorPage, { SIMULADOR_TITLE } from "./simulador/page";
+import { DIRECTOR_LINE, NEVER_PAYWALLED, PRICES_NOTE, PRICING_SUBTITLE, SIMULATOR_PATH, SOON_LABEL, TIERS } from "./tiers";
 
 const html = () => renderToStaticMarkup(<PricingPage />);
 
@@ -51,13 +52,36 @@ describe("/pricing tiers (F2)", () => {
     expect(programa.freeNote).toContain("nunca datos de una persona");
   });
 
-  it("marks unbuilt features (vacancy checks, state dashboard) as in development", () => {
+  it("marks unbuilt features (report button, vacancy checks, state dashboard) as in development", () => {
     const soon = TIERS.flatMap((t) => t.features.filter((f) => f.soon).map((f) => f.text));
     expect(soon).toEqual([
+      "Botón para reportar",
       "Revisión de las vacantes que publicas, con alerta mensual",
       "Tablero estatal por estado y canal (solo datos agregados)",
     ]);
-    expect(html().split(SOON_LABEL).length - 1).toBeGreaterThanOrEqual(2);
+    expect(html().split(SOON_LABEL).length - 1).toBeGreaterThanOrEqual(3);
+  });
+
+  it("persona fixes: director line, no-IT note, IVA prices, simulator moved to its own page", () => {
+    const page = html();
+    expect(page).toContain(DIRECTOR_LINE);
+    expect(DIRECTOR_LINE).toBe("Protege a tus estudiantes de ofertas de trabajo falsas, sin que Sistemas tenga que instalar nada.");
+    expect(page).toContain("Un botón en tu portal que abre Lupa. No requiere trabajo de Sistemas.");
+    expect(page).toContain("$27,840 con IVA");
+    expect(page).toContain("$104,400 con IVA");
+    expect(TIERS.find((t) => t.id === "buscador")!.priceWithIva).toBeUndefined();
+    expect(page).toContain(`href="${SIMULATOR_PATH}"`);
+    expect(page).toContain("¿Cómo se sostiene Lupa? Ver el simulador de ingresos");
+    // The coordinator no longer meets the founder vocabulary on /pricing.
+    for (const word of ["pipeline", "Costo por revisión", "Margen", "Simulador de ingresos</h2>"]) expect(page).not.toContain(word);
+  });
+
+  it("the simulator page has the simulator and a way back", () => {
+    const page = renderToStaticMarkup(<SimuladorPage />);
+    expect(page).toContain(SIMULADOR_TITLE);
+    expect(page).toContain("Simulador de ingresos");
+    expect(page).toContain("Datos inventados para simular. No son resultados reales.");
+    expect(page).toContain('href="/pricing"');
   });
 
   it("is linked from the footer", () => {

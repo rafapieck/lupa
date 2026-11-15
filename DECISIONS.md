@@ -364,3 +364,31 @@ Google sign-in worked for both accounts and returned to `/pricing`, so the `www`
 - Shipped: F0–F7 (see entries above).
 - Not built, by design (PACKET §8): payments, IVA logic, Programa dashboard, Campus embed, vacancy checks and monthly alert, report generator, seeker accounts, scenario sharing, CRM.
 - Open: tighten the `lupa-*` redirect pattern; run §12c 7–9 in the SQL editor; the report button; send Ibero the one-page proposal.
+
+## 2026-11-15 — After F8: source links, nav, persona-test fixes
+
+### `/about` sources and navigation
+- **"Fuente por verificar" replaced with linked source names** (links from Rafael): FTC median loss, Q4 2025 reports, via KJRH; Consejo Ciudadano, 5° Reporte de Trata de Personas, via Expansión Política. Links open in a new tab (`noopener noreferrer`). Both are news reports of the original data, which the label says ("vía …"). A test pins the memo to exactly these two URLs.
+- **"Precios" added to the top navigation** (Revisar oferta · Cómo funciona · Precios · Nosotros), as Rafael asked. It wraps to a second line at 390px, like the three-link header already did. The footer link stays.
+
+### Persona test (synthetic): Lic. Patricia Gómez, university bolsa coordinator
+Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not the price, but trust. Synthetic, so it doesn't replace a real coordinator.
+
+**Fixed:**
+- **Worst confusion: the simulator talked to founders, not to her.** The revenue simulator and save/load scenarios moved to their own page, **`/pricing/simulador`** ("¿Cómo se sostiene Lupa?", for founders and investors). `/pricing` keeps one small link: "¿Cómo se sostiene Lupa? Ver el simulador de ingresos". A test checks that `/pricing` no longer shows "pipeline", "Costo por revisión" or "Margen".
+- **Google sign-in now returns to `/pricing/simulador`** (`redirectTo = origin + "/pricing/simulador"`), still never relying on the shared Site URL. The existing redirect allowlist (`…lupaempleo.xyz/**`) already covers the new path.
+- **Director line** at the top of `/pricing`: "Protege a tus estudiantes de ofertas de trabajo falsas, sin que Sistemas tenga que instalar nada."
+- **Under "Lupa en tu bolsa de trabajo":** "Un botón en tu portal que abre Lupa. No requiere trabajo de Sistemas."
+- **IVA-included price, small text, both paid tiers:** Campus "$27,840 con IVA", Programa "$104,400 con IVA" (16%). Buscador gets none.
+- **"Botón para reportar" tagged "En desarrollo"** (F8 finding: the check has no report button yet).
+
+**Deferred:**
+- **Pilot terms:** she asked for a free semester; the packet's proposal says 1 month free. Decide before the Ibero proposal.
+- **PDF proposal** she can forward (PACKET Appendix B as a PDF).
+- **Proof from a real customer:** none yet, and the page must not imply one.
+- **Domain:** `.xyz` may read as less institutional; revisit at renewal.
+- "Hoy no cobramos" / "En desarrollo" still read as "project", but they're true, so they stay until a real coordinator weighs in.
+
+### Verified
+- Production build at 390px: `/pricing`, `/pricing/simulador`, `/about` and `/` have no horizontal scroll. The `/pricing` link opens the simulator with the Case 1 numbers; sign-in from there sends `redirect_to=<origin>/pricing/simulador`.
+- Suite: `Test Files  23 passed (23) · Tests  198 passed (198)`.

@@ -7,7 +7,7 @@ vi.mock("next/server", () => ({ connection: () => Promise.resolve() }));
 vi.mock("@/lib/checks-this-week", () => ({ getChecksThisWeek: () => Promise.resolve(null) }));
 
 import AboutPage from "./page";
-import { FX_LABEL, MEMO_TITLE, SOURCE_PENDING } from "./memo";
+import { FX_LABEL, MEMO_TITLE, SOURCES } from "./memo";
 
 const html = renderToStaticMarkup(<AboutPage />);
 
@@ -18,16 +18,20 @@ describe("/about 10:1 memo (F4)", () => {
     expect(html).toContain('href="/pricing"');
   });
 
-  it("keeps the figures and names their sources, marked pending, with no invented links", () => {
+  it("keeps the figures and links each one to the source Rafael gave", () => {
     expect(html).toContain("US$2,000");
     expect(html).toContain("$36,000 MXN");
     expect(html).toContain("30%");
     expect(html).toContain("FTC");
     expect(html).toContain("Consejo Ciudadano");
-    expect(html.split(SOURCE_PENDING).length - 1).toBeGreaterThanOrEqual(2);
+    expect(html).not.toContain("Fuente por verificar");
     expect(html).toContain(FX_LABEL);
+    expect(html).toContain(`href="${SOURCES.ftc.href}"`);
+    expect(html).toContain(`href="${SOURCES.consejo.href}"`);
+    expect(html).toContain('rel="noopener noreferrer"');
+    // Only these two links: no invented URLs.
     const memoSource = readFileSync(path.resolve(__dirname, "memo.tsx"), "utf8");
-    expect(memoSource).not.toMatch(/https?:\/\//);
+    expect(memoSource.match(/https?:\/\//g)?.length).toBe(2);
   });
 
   it("promises aggregated data only", () => {

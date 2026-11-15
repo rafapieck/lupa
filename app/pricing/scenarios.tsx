@@ -6,6 +6,7 @@ import { savePending } from "@/lib/pricing/pending";
 import { SCENARIO_COLUMNS, rowToRaw, toInsertRow, type ScenarioRow } from "@/lib/pricing/scenario-row";
 import { SCENARIO_NAME_MAX, validateInputs, validateScenarioName } from "@/lib/pricing/simulate";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
+import { SIMULATOR_PATH } from "./tiers";
 import { toRawState, type RawState } from "@/lib/pricing/raw";
 
 export const SIGN_IN_LABEL = "Inicia sesión con Google para guardar";
@@ -22,9 +23,9 @@ export const SAVED = "Escenario guardado.";
 
 const dateFmt = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric" });
 
-/** The URL Google sign-in returns to: always this origin's /pricing (the shared Site URL belongs to another app). */
+/** The URL Google sign-in returns to: always this origin's simulator page (the shared Site URL belongs to another app). */
 export function redirectTarget(origin: string): string {
-  return `${origin}/pricing`;
+  return `${origin}${SIMULATOR_PATH}`;
 }
 
 /** Strips an OAuth error that Supabase put in the URL; returns true if there was one. */

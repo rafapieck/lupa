@@ -13,9 +13,10 @@ import SiteHeader from "./site-header";
 afterEach(() => getChecksThisWeek.mockReset());
 
 describe("site header", () => {
-  it("links to the checker, Cómo funciona and Nosotros", () => {
+  it("links to the checker, Cómo funciona, Precios and Nosotros", () => {
     const html = renderToStaticMarkup(<SiteHeader />);
-    for (const text of ["Lupa", "Revisar oferta", "Cómo funciona", "Nosotros"]) expect(html).toContain(text);
+    for (const text of ["Lupa", "Revisar oferta", "Cómo funciona", "Precios", "Nosotros"]) expect(html).toContain(text);
+    expect(html).toContain('href="/pricing"');
     expect(html).toContain('href="/product"');
     expect(html).toContain('href="/about"');
   });

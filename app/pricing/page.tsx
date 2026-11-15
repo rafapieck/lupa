@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
-import Simulator from "./simulator";
-import { NEVER_PAYWALLED, PRICES_NOTE, PRICING_SUBTITLE, PRICING_TITLE, SOON_LABEL, TIERS } from "./tiers";
+import Link from "next/link";
+import {
+  DIRECTOR_LINE,
+  NEVER_PAYWALLED,
+  PRICES_NOTE,
+  PRICING_SUBTITLE,
+  PRICING_TITLE,
+  SIMULATOR_LINK,
+  SIMULATOR_PATH,
+  SOON_LABEL,
+  TIERS,
+} from "./tiers";
 
 export const metadata: Metadata = {
   title: "Precios — Lupa 🔍",
@@ -13,6 +23,9 @@ export default function PricingPage() {
       <header>
         <h1 className="text-4xl font-bold tracking-tight">{PRICING_TITLE}</h1>
         <p className="mt-2 text-lg leading-snug text-gray-800">{PRICING_SUBTITLE}</p>
+        <p className="mt-3 rounded-xl border-l-4 border-amber-400 bg-amber-50 px-4 py-3 text-lg leading-snug font-semibold text-gray-900">
+          {DIRECTOR_LINE}
+        </p>
       </header>
 
       <section aria-label="Planes" className="flex flex-col gap-3">
@@ -27,9 +40,12 @@ export default function PricingPage() {
             }
           >
             <div className="flex flex-wrap items-start justify-between gap-2">
-              <h2 className="text-xl font-bold text-gray-900">
-                {tier.name} · {tier.price}
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {tier.name} · {tier.price}
+                </h2>
+                {tier.priceWithIva && <p className="text-sm text-gray-600">{tier.priceWithIva}</p>}
+              </div>
               <span
                 className={
                   tier.recommended
@@ -44,6 +60,7 @@ export default function PricingPage() {
               {tier.features.map((f) => (
                 <li key={f.text}>
                   {f.text}
+                  {f.note && <span className="block text-base text-gray-600">{f.note}</span>}
                   {f.soon && (
                     <span className="ml-2 inline-block rounded bg-gray-200 px-2 text-sm font-medium whitespace-nowrap text-gray-700">
                       {SOON_LABEL}
@@ -69,7 +86,9 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <Simulator />
+      <Link href={SIMULATOR_PATH} className="py-2 text-base text-blue-700 underline underline-offset-4">
+        {SIMULATOR_LINK}
+      </Link>
     </main>
   );
 }
