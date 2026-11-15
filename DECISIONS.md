@@ -392,3 +392,23 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 ### Verified
 - Production build at 390px: `/pricing`, `/pricing/simulador`, `/about` and `/` have no horizontal scroll. The `/pricing` link opens the simulator with the Case 1 numbers; sign-in from there sends `redirect_to=<origin>/pricing/simulador`.
 - Suite: `Test Files  23 passed (23) · Tests  198 passed (198)`.
+
+## Session log — 2026-11-14 to 2026-11-15 (Week 14 · Pricing)
+
+**Features done:** F0 `294005c` · F1 `c46c487` · F2 `d498f3b` (deploy #1) · F3 `03527cd` · F4 `9983cde` · F5 `2f29276` (deploy #2) · F6 `cf9de6d` · F7 `5d488a2` (deploy #3) · F8 `8119691` · persona fixes + sources + nav `114abab` (deploy #4 with this commit).
+
+**Decisions and why:**
+- F5 was a copy audit only: the semáforo is a live Gemini call, so the Week 9 "análisis de IA simulado" note stays on the fallback path (Rafael).
+- The 10:1 memo went into the existing `/about`, not a new page (Rafael).
+- Browser-only Supabase auth with PKCE and an explicit `redirectTo`, because semestre's Site URL belongs to La Suma.
+- The simulator moved to `/pricing/simulador` after the synthetic coordinator persona closed `/pricing` at the simulator.
+- IVA-included price on both paid tiers (Rafael).
+
+**Failed or skipped:**
+- PACKET §12c checks 7–9 (direct SQL as user B against A's row) weren't reported; the UI-level RLS checks all passed.
+- The `https://lupa-*.vercel.app/**` redirect pattern is broader than our previews (F8 ⚠️).
+- The seeker metric (% of checks that end in a report) can't be measured yet: there's no report button.
+
+**Manual steps:** M1 ✅ · M2/M3 ✅ (Google provider already existed; `www` redirect added) · M4 ✅ (vars already set) · M5 ✅ (UI checks 1–4 all pass).
+
+**Tomorrow's first move:** Turn Appendix B into the one-page Ibero proposal (decide 1-month vs. one-semester pilot first) and send it with the request for a 20-minute meeting, linking `www.lupaempleo.xyz/pricing`.
