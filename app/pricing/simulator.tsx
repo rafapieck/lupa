@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { formatCount, formatInput, formatMoney, formatPct, isNegative } from "@/lib/pricing/format";
+import { useEffect, useState } from "react";
+import { formatCount, formatMoney, formatPct, isNegative } from "@/lib/pricing/format";
 import {
   DEFAULTS,
   FIELD_SPECS,
@@ -9,8 +9,12 @@ import {
   simulate,
   validateInputs,
   type FieldName,
+  type RawInputs,
   type SimInputs,
 } from "@/lib/pricing/simulate";
+import { takePending } from "@/lib/pricing/pending";
+import { initialRaw, toRawState, type RawState } from "@/lib/pricing/raw";
+import Scenarios from "./scenarios";
 
 export const SIM_TITLE = "Simulador de ingresos";
 export const SIM_BANNER = "Datos inventados para simular. No son resultados reales.";
@@ -31,27 +35,51 @@ export const FIELD_UI: Record<FieldName, FieldUi> = {
   reviewCostPerReport: { label: "Costo de revisar cada reporte", prefix: "$", suffix: "MXN", optional: true },
 };
 
-type RawState = Record<FieldName, string>;
 type Period = "monthly" | "annual";
-
-const initialRaw = (): RawState =>
-  Object.fromEntries(FIELD_SPECS.map((f) => [f.name, formatInput(DEFAULTS[f.name].value)])) as RawState;
 
 export default function Simulator() {
   const [raw, setRaw] = useState<RawState>(initialRaw);
   const [lastValid, setLastValid] = useState<SimInputs>(defaultValues);
+  const [wantsSave, setWantsSave] = useState(false);
+
+  function replaceAll(next: RawState) {
+    setRaw(next);
+    const v = validateInputs(next);
+    if (v.ok) setLastValid(v.values);
+  }
+
+  // Back from Google sign-in: restore what the user had typed.
+  useEffect(() => {
+    const pending = takePending();
+    if (!pending) return;
+    // One-time restore from sessionStorage after the OAuth redirect (external state).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    replaceAll(toRawState(pending.raw as RawInputs));
+    setWantsSave(pending.wantsSave);
+  }, []);
+
+  return (
+    <>
+      <SimulatorView raw={raw} lastValid={lastValid} onChange={(name, value) => replaceAll({ ...raw, [name]: value })} />
+      <Scenarios raw={raw} onLoad={replaceAll} openSaveOnArrival={wantsSave} />
+    </>
+  );
+}
+
+export function SimulatorView({
+  raw,
+  lastValid,
+  onChange,
+}: {
+  raw: RawState;
+  lastValid: SimInputs;
+  onChange: (name: FieldName, value: string) => void;
+}) {
   const [period, setPeriod] = useState<Period>("monthly");
 
   const validation = validateInputs(raw);
   const errors = validation.ok ? {} : validation.errors;
   const result = simulate(validation.ok ? validation.values : lastValid);
-
-  function onChange(name: FieldName, value: string) {
-    const next = { ...raw, [name]: value };
-    setRaw(next);
-    const v = validateInputs(next);
-    if (v.ok) setLastValid(v.values);
-  }
 
   const monthly = period === "monthly";
   const revenue = monthly ? result.monthlyRevenue : result.annualRevenue;

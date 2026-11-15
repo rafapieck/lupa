@@ -276,3 +276,26 @@ PACKET §10.5 and §12d assumed the semáforo might be simulated. F0 found it is
 
 ### Manual steps
 M1–M5 are pending. F6 waits for M1–M4.
+
+## 2026-11-15 — F6: Google sign-in on `/pricing`
+
+### Setup state (from Rafael)
+- M1 done: `scenarios` + RLS + 4 policies created in **semestre**.
+- M2/M3: the Google provider was **already on** in semestre from an earlier week (existing Client ID/secret, not a new "Lupa" client). **The Site URL belongs to La Suma and stays as it is.** Redirect URLs added: `https://lupaempleo.xyz/**`, `https://lupa-iota.vercel.app/**`, `https://lupa-*.vercel.app/**`. Asked Rafael to also add `https://www.lupaempleo.xyz/**`, because `www` is the primary domain (the apex redirects to it). Without it, Supabase sends the user to the Site URL (La Suma).
+- M4: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` were already in Vercel.
+
+### Decisions
+- **Always pass `redirectTo = window.location.origin + "/pricing"`** in `signInWithOAuth` (Rafael's rule). The shared Site URL points to another app, so we never rely on it. Working from the current origin also lets previews return to themselves.
+- **Browser-only auth with `@supabase/supabase-js` and the PKCE flow** (`lib/supabase/browser.ts`), no `@supabase/ssr`. Nothing on the server needs the user's session: scenarios are read and written from the browser with the user's token, so RLS applies to every query. supabase-js exchanges `?code=` on return and strips it from the URL. Adding cookie-based SSR auth would add server code and middleware for no gain this week.
+- **The existing server-side clients stay as they are** (`fraud_patterns`, `checks`, `check_events`). The browser client is a separate singleton, used only on `/pricing`.
+- **Inputs survive the round trip**: before redirecting, the typed values go to `sessionStorage` (`lupa_pricing_pending`). On return they're restored once and removed. Every storage access is wrapped in try/catch, so private mode just falls back to the defaults.
+- **A failed sign-in** (Supabase returns `?error=…`) shows "No se pudo iniciar sesión. Tus datos siguen en pantalla." and the error is stripped from the URL.
+- Without the env vars, the page says "Guardar escenarios no está disponible en este momento. El simulador funciona igual." and the simulator still works.
+- The sign-in UI renders nothing on the server or during hydration (`useSyncExternalStore` with an `undefined` server snapshot), so there's no hydration mismatch on the static page.
+
+### Verified
+- Local production build with a stubbed Supabase host: tapping "Inicia sesión con Google para guardar" goes to `/auth/v1/authorize?provider=google` with a PKCE `code_challenge` and `redirect_to=<origin>/pricing`. Coming back with an error restores "50,000" in the checks field and shows the message.
+- `.next/static` has no `service_role` string. A test also fails if any file in `app/` or `lib/` mentions it.
+- The offer check (`/api/check`) wasn't touched and needs no sign-in.
+- **Pending (Rafael, live):** sign in with Google on `www.lupaempleo.xyz/pricing`, return with the inputs intact, sign out.
+- Suite: `Test Files  22 passed (22) · Tests  182 passed (182)`.
