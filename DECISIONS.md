@@ -312,3 +312,55 @@ M1–M5 are pending. F6 waits for M1–M4.
 - Verified in a browser on a production build with a stubbed Supabase backend (390px, no horizontal scroll): the insert body is exactly the 9 inputs + name + `formula_version: 1`; Cargar after changing a field brings back $15,500.00; the delete prompt appears in the page. `.next/static` has no `service_role`.
 - **Pending (Rafael, live): M5 and RLS checks 5–10 from PACKET §12c.** Steps in `/mnt/project-files/lupa/M5_RLS_CHECK.md`.
 - Suite: `Test Files  23 passed (23) · Tests  195 passed (195)`.
+
+## 2026-11-15 — F8: final checks
+
+### M5 (Rafael, live on www.lupaempleo.xyz/pricing, 2026-11-15): all pass
+1. A signed in with Google, saved "Escenario A", saw it under Mis escenarios. ✅
+2. B (second Google account, Safari private tab) signed in: list empty, "Escenario A" not visible. ✅
+3. B saved "Escenario 2" and sees only that one. ✅
+4. A reloaded: only "Escenario A". ✅
+
+Google sign-in worked for both accounts and returned to `/pricing`, so the `www` redirect URL is in place and the La Suma Site URL was never used.
+
+### Tests and secret scan
+- `npm test`: `Test Files  23 passed (23) · Tests  195 passed (195)`.
+- Repo search for `service_role`, `sk-…`, `AIza…`, JWT-shaped strings: only mentions in docs and the guard test. No `.env` file is tracked (only `.env.example`, names only). `.next/static` has no `service_role`.
+
+### PACKET §11 security floor
+- ✅ **No secrets in the repo.** Scan above. Gemini key, Google OAuth secret and Supabase keys live in Vercel or Supabase only.
+- ✅ **Service-role key never in client code.** The browser client uses the anon key + the user's session; a test fails if `app/` or `lib/` mention `service_role`.
+- ✅ **Auth required for saved scenarios.** No anon policy; the UI asks for Google before saving; the simulator works signed out (M5, tests).
+- ✅ **RLS on for `scenarios`**, 4 policies scoped to `auth.uid()`, no anon policy (M1, M5 steps 2–4).
+- ⚠️ **Redirect URLs allowlisted to production and preview only.** Production (`lupaempleo.xyz`, `www`) and `lupa-iota.vercel.app` are fine. `https://lupa-*.vercel.app/**` is broader than our previews: it matches any Vercel project whose name starts with `lupa-`, including other people's. PKCE limits the damage (a stolen code is useless without the verifier stored in our origin), but tighten it to the team-scoped preview pattern (`https://lupa-*-<team-slug>.vercel.app/**`) or remove it, since we deploy straight to `main`. Also note: semestre's **Site URL belongs to La Suma**, so the two apps share one auth project; every Lupa sign-in passes an explicit `redirectTo`.
+- ✅ **Every simulator field validated for type and range** in the UI (`validateInputs`, tests) and in the DB (`check` constraints from §9, created in M1). The crafted insert with `conversion_rate = 500` wasn't run live; the constraint is in the schema.
+- ✅ **Only invented or labeled data.** Every default carries "inventado", "supuesto" or "precio de lista"; the banner is visible; the Ibero log lives only in `docs/`.
+- ✅ **Scenario names rendered as text** (React text nodes; XSS test).
+
+### PACKET §12c auth and RLS
+- ✅ 1 simulator signed out · ✅ 2 offer check signed out · ✅ 5 save and see own · ✅ 6 B doesn't see A · ✅ 11 bundle scan.
+- ✅ by design, not run live: 3–4 (no anon policy), 10 (sign-out clears the list; test).
+- ⏳ 7–9 (B selecting, updating, deleting A's row by id; inserting with A's `user_id`) are the SQL-editor steps in `M5_RLS_CHECK.md` Part 3; Rafael reported the UI checks only. The policies make them fail closed; run them once to close the box.
+
+### PACKET §12d design rules
+- ✅ Copy search for `safe`, `segur`, `confiable`, `legítim`: no claim about an offer (test enforces it across `app/`).
+- ✅ Every tier card states that checking an offer is free.
+- ✅ Every default shows its label; "Datos inventados…" banner visible.
+- ✅ "Precios antes de IVA." visible on `/pricing`.
+- ✅ Programa says "agregado por estado y canal" and promises no individual data.
+- ✅ Semáforo source recorded: live Gemini call; fallback note kept (F5).
+- ✅ Campus lists "Revisión de las vacantes que publicas, con alerta mensual", tagged "En desarrollo".
+- ❌ → fixed in the next commit: **the Buscador card says "Botón para reportar", but the check has no report button.** The only reporting today is the 088 / Policía Cibernética line after some answers on the intent card. Per Hard rule "nothing implies it's live", the bullet gets the "En desarrollo" tag.
+
+### PACKET §3 success definition
+1. ✅ `/pricing` live with the three tiers, the free/paid line and "antes de IVA".
+2. ✅ Revenue simulator with every input, monthly and annual revenue, cost and margin, labels on screen.
+3. ✅ Google sign-in, save and reload own scenarios only (M5).
+4. ✅ `/about` holds the 10:1 memo. Source links arrived 2026-11-15 and are added in the next commit.
+5. ✅ Ibero conversation in `docs/conversations/ibero.md`.
+6. ⚠️ **Seeker metric (% of checks that end in a report)** is defined and shown as the simulator's "Tasa de reportes" (inventado). **Gap:** it can't be measured yet, because there's no report button (see §12d above). Building it is the step that turns this metric real.
+
+### What shipped / what didn't
+- Shipped: F0–F7 (see entries above).
+- Not built, by design (PACKET §8): payments, IVA logic, Programa dashboard, Campus embed, vacancy checks and monthly alert, report generator, seeker accounts, scenario sharing, CRM.
+- Open: tighten the `lupa-*` redirect pattern; run §12c 7–9 in the SQL editor; the report button; send Ibero the one-page proposal.
