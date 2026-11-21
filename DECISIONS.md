@@ -433,9 +433,10 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 - **Secrets:** none. Searching for `service_role`, `sk-…`, `AIza…`, JWT-shaped strings and private keys found only the guard test and mentions in docs. Only `.env.example` is tracked, and it holds names only. The repo-wide suite passes: `Test Files  23 passed (23) · Tests  198 passed (198)`.
 - **Ready for later features:** `next/og` ships with Next 16.4.3 (no new dependency). `upfront_payment` and `personal_documents` exist in `lib/patterns.ts`.
 
-### Small packet inconsistencies (no packet change; noted for the build)
-- §4 item 3 lists the sources as `fb_group, wa_status, wa_share, direct`, but §4 item 6, the §11 SQL and prompt F4 include `contenido`. The build uses all five.
-- §4 item 10 points to "section 12d" for the persona test; it is §14d.
+### Packet fixes (Rafael asked for exactly these two)
+- §4 item 3: the source list now includes `contenido` (`fb_group`, `wa_status`, `wa_share`, `contenido`, `direct`), matching §4 item 6, the §11 SQL and prompt F4.
+- §4 item 10: "section 12d" → "section 14d" (the persona test).
 
-### Blocked
-- **Mockup (`docs/mockup-week15.png`) not received yet** (manual step M2). F0's commit (`docs: F0 week 15 findings and mockup`) waits for the image, so these findings are pushed to the working branch only, not to `main`.
+### Mockup
+- Rafael's Week 15 mockup (manual step M2) is saved as `docs/mockup-week15.png`. It arrived as a JPEG and was converted to PNG (768×1376), with no edits. It is embedded under packet §5 as `![Mockup share + WhatsApp preview](mockup-week15.png)`.
+- ✅ F0 findings are in DECISIONS.md.

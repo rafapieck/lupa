@@ -145,16 +145,18 @@ Before the module closes, all of this works on the live site:
 
 1. **The share flow works.** On a 🔴 or 🟡 result, a button **“Mandar aviso por WhatsApp”** opens WhatsApp with a short message and a link to `/s/<verdict>/<pattern ids>`. That page shows the verdict card (signals, official sources, one action, “Revisa tu oferta” button) and has a 1200×630 link preview image. **No offer text, company name, phone or date of the original check appears on it.**
 2. **Green is never shareable.** There is no share button on 🟢, and `/s/green/...` returns 404. A shared “no encontramos señales” card would read as an endorsement of the offer.
-3. **Source tags are counted.** `?src=` on any page is kept for the visit and saved with the check, from a fixed list only (`fb_group`, `wa_status`, `wa_share`, `direct`). Anything else is ignored.
+3. **Source tags are counted.** `?src=` on any page is kept for the visit and saved with the check, from a fixed list only (`fb_group`, `wa_status`, `wa_share`, `contenido`, `direct`). Anything else is ignored.
 4. **`shared` is a new event kind** in `check_events`, logged when the share button is tapped.
 5. **`/api/card` renders the series cards** (A1 square, C1 vertical) from `fraud_patterns`, in the brand layout, as PNG.
 6. **`/contenido` is live:** the campaign page with the three series, the three finished assets, the three sketches as text, the “promise we won’t make”, and a “Revisa una oferta” button tagged `?src=contenido`. (`contenido` joins the source list.)
 7. **Masking before the AI call (Week 15 shadow decision).** Phone numbers, emails, URLs and INE/CURP-shaped strings are replaced with `[teléfono]`, `[correo]`, `[liga]`, `[documento]` before the text goes to Gemini. Keyword rules still run on the full text on the server. Verdicts on the 5 PACKET test offers don’t change.
 8. **The site description is the rewritten line** (section 3b).
 9. **`docs/content/`** holds `CONCEPTS.md` (6 concepts), `METHOD.md` (the 6 roles with the B1 walk-through) and `APPROVALS.md` (Rafael’s sign-off lines).
-10. **Persona test done** in a fresh chat (section 12d), recorded in `docs/PERSONA_TEST_WEEK15.md`, with the worst confusion fixed and retested.
+10. **Persona test done** in a fresh chat (section 14d), recorded in `docs/PERSONA_TEST_WEEK15.md`, with the worst confusion fixed and retested.
 
 ## 5. Mockup: image-generation prompt
+
+![Mockup share + WhatsApp preview](mockup-week15.png)
 
 > A high-fidelity pair of mobile screenshots side by side, iPhone-size portrait (390×844), for a Mexican job-fraud checker called “Lupa”. Clean civic-tech style: white background, deep navy text (#1B2A41), warm amber accent (#F2A900), soft gray cards with 12px rounded corners, simple sans-serif font. No people, no stock photos, no skulls or warning triangles.
 >
