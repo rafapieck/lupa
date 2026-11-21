@@ -440,3 +440,24 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 ### Mockup
 - Rafael's Week 15 mockup (manual step M2) is saved as `docs/mockup-week15.png`. It arrived as a JPEG and was converted to PNG (768×1376), with no edits. It is embedded under packet §5 as `![Mockup share + WhatsApp preview](mockup-week15.png)`.
 - ✅ F0 findings are in DECISIONS.md.
+
+## 2026-11-21 — Week 15 F1: shareable verdict card
+
+### What shipped
+- `lib/share.ts`: `parseShare()` is the one place that validates a share link. The page, the OG image and the proxy all use it.
+- `/s/[verdict]/[patterns]`: shows the verdict badge, each signal's `label_es` with "Fuente: …", the strongest pattern's `next_step_es`, the **"Revisa tu oferta"** button (→ `/?src=wa_share`) and the gray note "Este aviso solo muestra señales de alerta. No incluye la oferta original."
+- `opengraph-image` (1200×630, about 69 KB): navy band with the amber "LA REVISÉ CON LUPA", the badge, up to 3 signals, "Fuente: …" and the footer "Revisa la tuya en lupaempleo.xyz". It uses no web fonts or emoji and caches publicly for 1 day.
+
+### Decisions
+- **The verdict must match the signals.** Besides the prompt's rules (red/yellow only, 1–6 known distinct ids, segment ≤ 200 chars), a link is accepted only if Lupa's own scoring (`verdictFor` on the summed weights) gives that same verdict. So `/s/red/no_company_name` is a 404: a link can't turn a weak signal into "Riesgo alto". Scoring itself is unchanged.
+- **Real 404s come from `proxy.ts`.** With Cache Components the page streams, so `notFound()` inside it renders the not-found page but the status is already 200. The proxy runs `parseShare()` first and rewrites bad links (page and image) to an unmatched path, which answers HTTP 404. The page still calls `notFound()` as a second guard.
+- **`export const instant = false`** on the share page: it only reads its URL, and crawlers need the og: tags in the first response.
+- **`noindex, nofollow`**: share links are for people in WhatsApp, not search engines.
+- Signals are sorted strongest first (weight, then `lib/patterns.ts` order), so the card and the OG image lead with the main risk.
+- `lib/share.ts` was added to the copy-audit file list.
+
+### Checks
+- Tests: `lib/share.test.ts` and `app/share.test.tsx` cover the §14b `/s/...` rows: 200 with signals and sources; 404 on green, an unknown id and 7 ids (page `notFound()` and proxy rewrite); no offer text, phone, date or check id in the HTML. Suite: `Test Files  25 passed (25) · Tests  221 passed (221)`. ESLint and `tsc` are clean.
+- Local production build: `/s/red/upfront_payment,personal_documents` → 200, `scrollWidth` 390 at 390px (no horizontal scroll). `/s/green/…`, `/s/red/fake_id`, 7 ids and the green OG image → 404.
+- ✅ F1 criteria pass.
+- **Note:** `next build` printed a Next.js security notice. `npm audit` lists moderate advisories for next 16.0.0–16.4.4, fixed in 16.4.6. No upgrade was made; it waits for Rafael's OK.

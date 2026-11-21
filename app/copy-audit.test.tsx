@@ -23,7 +23,7 @@ describe("copy audit: green never claims an offer is safe", () => {
   // User-facing strings live in app/ plus the labels and tips in these lib files.
   const files = [
     ...sourceFiles(path.resolve(__dirname)),
-    ...["score.ts", "patterns.ts", "validate.ts"].map((f) => path.resolve(__dirname, "../lib", f)),
+    ...["score.ts", "patterns.ts", "validate.ts", "share.ts"].map((f) => path.resolve(__dirname, "../lib", f)),
   ];
 
   it.each(files.map((f) => [path.relative(path.resolve(__dirname, ".."), f), f]))(
