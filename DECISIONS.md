@@ -412,3 +412,31 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 **Manual steps:** M1 ✅ · M2/M3 ✅ (Google provider already existed; `www` redirect added) · M4 ✅ (vars already set) · M5 ✅ (UI checks 1–4 all pass).
 
 **Tomorrow's first move:** Turn Appendix B into the one-page Ibero proposal (decide 1-month vs. one-semester pilot first) and send it with the request for a 20-minute meeting, linking `www.lupaempleo.xyz/pricing`.
+
+## 2026-11-21 — Week 15 · Distribution, F0: repo findings
+
+### Docs
+- `docs/PACKET.md` and `docs/IMPLEMENTATION_PROMPT.md` replaced with the Week 15 versions (`60c920f`). Rafael sent them as PDFs, so they were transcribed back to Markdown. Every word was kept; only the Markdown layout (headings, tables, code blocks, the Mermaid flows) was rebuilt. A word-by-word comparison against the PDF text found no differences beyond line wraps and repeated table headers.
+
+### Findings
+- **Where the check runs and saves.** `app/api/check/route.ts`, `POST()`:
+  - It calls `extractSignals(validation.text)` (line 40, in a `Promise.all` with `loadPatterns()`), then `scoreSignals()`.
+  - It saves with `saveCheck(result, simulated, repeatVisit, example)` (line 50), defined in `lib/save-check.ts` → `saveCheck()`, which inserts into `checks` (lines 60–61).
+  - **For F5:** `extractSignals(text)` in `lib/extract.ts` runs both the keyword guard (`keywordSignals(text)`) and Gemini on the *same* text. So masking needs `extractSignals` to take the original text for the keywords and the masked text for Gemini. Masking only in the route would weaken the guard.
+- **`check_events` constraint names.** These are the names produced by `supabase/events.sql`, checked by running the repo's SQL files in order on a local Postgres 16:
+  - `check_events_kind_check` (kind ∈ reply_copied, intent)
+  - `check_events_answer_check` (answer ∈ the 4 answers, or null; unaffected)
+  - `check_events_answer_matches_kind`
+  
+  **The names in packet §11 are correct; no corrected SQL block is needed.** The §11 block ran twice on that local copy without errors. As `anon`, it accepted a `fb_group` check and a `shared` event with a null answer, and rejected `source = 'tiktok'`, a `shared` event with an answer, and a `select` on `checks`.
+- **Copy audit.** `app/copy-audit.test.tsx` reads the **source** of every non-test `.ts/.tsx/.css` file under `app/`, plus `lib/score.ts`, `lib/patterns.ts` and `lib/validate.ts`. It fails on `segur[ao]s?`, `es real`, `confiable` or `legítim`. Today that covers `/`, `/product`, `/about` (also `app/about/memo.test.tsx` on the rendered HTML), `/pricing`, `/pricing/simulador`, `/api/check` and `/api/event`. New routes under `app/` (`/s/...`, `/contenido`, `/api/card`) will be covered automatically by the source scan. F6 still adds rendered-output checks for the card text and the WhatsApp message, as the prompt asks.
+- **Secrets:** none. Searching for `service_role`, `sk-…`, `AIza…`, JWT-shaped strings and private keys found only the guard test and mentions in docs. Only `.env.example` is tracked, and it holds names only. The repo-wide suite passes: `Test Files  23 passed (23) · Tests  198 passed (198)`.
+- **Ready for later features:** `next/og` ships with Next 16.4.3 (no new dependency). `upfront_payment` and `personal_documents` exist in `lib/patterns.ts`.
+
+### Packet fixes (Rafael asked for exactly these two)
+- §4 item 3: the source list now includes `contenido` (`fb_group`, `wa_status`, `wa_share`, `contenido`, `direct`), matching §4 item 6, the §11 SQL and prompt F4.
+- §4 item 10: "section 12d" → "section 14d" (the persona test).
+
+### Mockup
+- Rafael's Week 15 mockup (manual step M2) is saved as `docs/mockup-week15.png`. It arrived as a JPEG and was converted to PNG (768×1376), with no edits. It is embedded under packet §5 as `![Mockup share + WhatsApp preview](mockup-week15.png)`.
+- ✅ F0 findings are in DECISIONS.md.
