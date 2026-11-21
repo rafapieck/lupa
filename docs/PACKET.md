@@ -1,425 +1,363 @@
-# PACKET: Lupa · Week 14 · Pricing
+# PACKET: Lupa · Week 15 · Distribution
 
-**Venture:** Lupa ([lupaempleo.xyz](https://lupaempleo.xyz)) · **Repo:** `rafapieck/lupa` · **Author:** Rafael Pieck Guerra · **Role:** USER
+**Venture:** Lupa ([lupaempleo.xyz](https://lupaempleo.xyz)) · **Repo:** `rafapieck/lupa` · **Author:** Rafael Pieck Guerra · **Role this week:** TECHNOLOGIST
 **Status:** Spec only. No code is written until this packet is approved.
+**What changed since Week 14:** the first audience moved from “students reached through university job boards” to “job seekers in WhatsApp and Facebook groups at the moment of a deposit request” (Brain Bending brief, Week 15). Pricing, payers and every Week 14 feature stay as they are.
 
 > **Data labels used in this file**
-> - **[INVENTED]**: a made-up default for simulation. Not a measurement, not a forecast.
+> - **[INVENTED]**: a made-up value for a demo or simulation. Not a measurement.
 > - **[ASSUMED]**: a working assumption Rafael chose. Replace it when real data exists.
-> - **[CITED, verify]**: a figure from Rafael's research. Confirm the source link before it goes on a public page.
+> - **[CITED]**: a figure from a linked public source.
+> - **[TO FILL]**: filled in by Rafael after the distribution test. Never filled with a guess.
 
 ---
 
 ## 1. Problem in my words
 
-The job seeker already pays for job fraud today. They don't pay Lupa. They pay the scammer. They pay an advance "fee" for training, uniforms or a medical exam (FTC median reported loss for job scams: US$2,000 **[CITED, verify]**). They pay with their data: a copy of their INE and CURP sent over WhatsApp to a stranger. They pay with risk: Consejo Ciudadano reports that ~30% of people recruited for exploitation are hooked through fake job offers **[CITED, verify]**. And they pay with lost real jobs: every week spent on a fake offer is a week not spent on a real one, and every scam makes the next real posting look suspicious.
+Lupa works once an offer is on its page. Getting the offer there is the problem. Fake job offers reach people where Lupa isn’t: Consejo Ciudadano CDMX reported that most arrive by direct messages to the phone (25%), WhatsApp (20%) and Facebook (16%) **[CITED]**. None of my 5 Week 13 users came through a job board, and all 5 had been asked for money before working.
 
-So charging the seeker is out. They are already the one losing money, and a paywall in front of a fraud check pushes the most vulnerable people away from it. The price has to sit on the **payer side**, with institutions that already run job boards and already carry the reputational and moral cost when a fraudulent offer reaches their users. Lupa needs a price for those institutions that holds up when someone asks "why that number?". This week builds the page that states the price, the simulator that shows the math behind it, and the first real pricing conversation.
+In a feed full of synthetic “tips” and fake recruiters, one more scary post doesn’t help. Lupa’s content has to be *the product working*: a real fraud signal, its official source, and one thing to do now. The verdict also has to travel back into the chat where the person would have asked anyway (“¿alguien ya fue?”). This week builds a launch playbook, a creative method that turns one input into on-brand content, three finished assets, and the small product changes that let a verdict be shared and let me count honestly what the test produced.
 
 ## 2. Exact user
 
-| Segment | Who | What they pay | What they get |
-|---|---|---|---|
-| **(a) Job seeker** (Buscador) | A person in Mexico who received a job offer by WhatsApp, Facebook, a job board or a flyer and isn't sure whether to trust it. | **$0, free forever.** About 30 seconds of their time. | Paste the offer and get a semáforo (red / yellow / green), the reasons behind it, and a report button. No account needed. |
-| **(b1) Institutional payer: Campus** | A university or municipal job board (bolsa de trabajo). First target: Ibero Bolsa de Trabajo. | **$24,000 MXN / year** (before IVA). | Lupa's check linked from **one** portal, **checks on the vacancies the institution posts, with a monthly alert**, and **monthly** aggregated reports of fraud patterns seen on that portal. |
-| **(b2) Institutional payer: Programa** | A state employment service (e.g. a state Servicio Nacional de Empleo office) or a foundation running employment programs. | **$90,000 MXN / year** (before IVA). | Everything in Campus, **plus** a state-level fraud-pattern dashboard (aggregated by state and channel only) and coverage for **multiple** portals or programs instead of one. |
-
-The seeker is the user. The institution is the payer. Institutions never receive any individual seeker's data (see §10).
-
-## 3. Success definition
-
-**Before the module closes, all of this works:**
-
-1. **`/pricing` is live** with three tiers: **Buscador $0 · Campus $24,000 MXN/yr · Programa $90,000 MXN/yr**, and a short explanation of the free-versus-paid line: *checking an offer is free in every tier; institutions pay for coverage on their portals and aggregated pattern reports.* The page says that prices are before IVA.
-2. **A revenue simulator** on `/pricing` takes these inputs:
-   - institutions in pipeline per tier (Campus, Programa)
-   - conversion rate
-   - price per tier
-   - seeker checks per month
-   - report rate
-   - cost per check
-   - (optional) review cost per report
-
-   It returns **monthly and annual revenue, cost and margin**, and shows every assumption and its label on screen.
-3. **Signed-in users (Google) can save and reload scenarios** and only ever see their own. Signed-out visitors can use the simulator fully but can't save.
-4. **`/about` holds the 10:1 memo** (draft in Appendix A).
-5. **The Ibero Bolsa de Trabajo pricing conversation is recorded** in `docs/conversations/ibero.md` (Appendix B). *Done: asked by email on November 10, 2026. The answer was "no, not as asked", because they need more information. The price itself wasn't rejected.* The follow-up is a one-page proposal and a request for a 20-minute meeting (outline in Appendix B).
-6. **The seeker-side metric is defined and visible: % of checks that end in a report** (`reports ÷ checks` over a period). It shows whether seekers pay with reports, the way Whoscall/Truecaller users do (§6). In the simulator it is the *report rate* input, which stays [INVENTED] until real counts exist. When it's measured, it's counted in aggregate only, with no offer text and no identity attached.
-
-### Simulator model (the math, stated once)
-
-All money is MXN, before IVA. Tax is out of scope and the screen says so.
-
-```
-paying_campus      = floor(campus_pipeline   × conversion_rate)
-paying_programa    = floor(programa_pipeline × conversion_rate)
-
-annual_revenue     = paying_campus × campus_price + paying_programa × programa_price
-monthly_revenue    = annual_revenue ÷ 12
-
-reports_per_month  = checks_per_month × report_rate
-monthly_cost       = checks_per_month × cost_per_check
-                   + reports_per_month × review_cost_per_report
-annual_cost        = monthly_cost × 12
-
-monthly_margin     = monthly_revenue − monthly_cost
-annual_margin      = annual_revenue  − annual_cost
-margin_pct         = monthly_margin ÷ monthly_revenue   (shown as "—" when revenue = 0)
-```
-
-- **Why `floor`:** you can't sell 0.45 of a license, so partial institutions round **down**. That is the conservative choice, and the screen states it.
-- **Rounding:** compute at full precision and round to 2 decimals only for display (margin % to 1 decimal).
-- **Report rate** produces `reports_per_month`. This number is shown as the aggregated insight institutions pay for. It costs money only if review cost per report is above 0.
-
-### Default inputs, all [INVENTED] except where marked
-
-| Input | Default | Label |
+| Who | What they pay | What they get this week |
 |---|---|---|
-| Campus institutions in pipeline | 20 | [INVENTED] |
-| Programa institutions in pipeline | 5 | [INVENTED] |
-| Conversion rate | 20% | [INVENTED] |
-| Campus price | $24,000 MXN/yr | Lupa list price |
-| Programa price | $90,000 MXN/yr | Lupa list price |
-| Seeker checks per month | 10,000 | [INVENTED] |
-| Report rate | 2% | [INVENTED] |
-| Cost per check | $0.05 MXN | [ASSUMED] |
-| Review cost per report | $0.00 MXN | [INVENTED] (off by default) |
+| **Job seeker (user).** 18–40, CDMX and Edomex, Android on limited data, looking for work in Facebook groups and WhatsApp forwards, being pushed to pay or send their INE *today*. | $0, always. | A shareable verdict card to send to their group or a relative, plus content that teaches one signal at a time. |
+| **Group admin / relative (secondary audience).** Runs or sits in the job group where the offer was posted. | $0. | A link that shows the warning signs and their official source, without the original offer text. |
+| **Institutional payer.** Unchanged from Week 14 (Campus / Programa). | Unchanged. | Nothing new this week. Not the channel for the launch test. |
 
-## 4. Mockup: image-generation prompt
-
-![Mockup /pricing + simulador](mockup-week14.jpg)
-
-> A high-fidelity mobile app screenshot, iPhone-size portrait (390×844), of a Spanish-language web page for a Mexican job-fraud checker called "Lupa". Clean, trustworthy civic-tech style: white background, deep navy text (#1B2A41), one accent color of warm amber (#F2A900), soft gray cards with 12px rounded corners, generous spacing, a simple sans-serif font like Inter. No stock photos and no people. One small magnifying-glass logo next to the word "Lupa" in the top-left corner, with a hamburger menu on the right.
->
-> **Top section**, title: "Precios". Subtitle: "Revisar una oferta de empleo siempre es gratis. Las instituciones pagan para cubrir sus bolsas de trabajo."
->
-> **Three stacked tier cards:**
-> 1. "Buscador · $0 · Gratis para siempre". Bullets: "Revisa cualquier oferta en 30 segundos", "Semáforo con razones", "Botón para reportar". Small tag: "Sin cuenta".
-> 2. "Campus · $24,000 MXN/año". Bullets: "Lupa en tu bolsa de trabajo", "Revisión de las vacantes que publicas, con alerta mensual", "Reporte mensual de patrones de fraude (solo datos agregados)". Amber outline marking it as the recommended plan, tag "Universidades y municipios".
-> 3. "Programa · $90,000 MXN/año". Bullets: "Todo lo de Campus", "Tablero estatal por estado y canal", "Varios portales y programas". Tag "Servicios estatales y fundaciones".
->
-> Under the cards, small gray text: "Precios antes de IVA." And a highlighted line with a lock-open icon: "Revisar ofertas nunca está detrás de un pago, en ningún plan."
->
-> **Simulator section**, title: "Simulador de ingresos". A yellow banner: "Datos inventados para simular. No son resultados reales." Compact input rows with a label on the left and a number field on the right: "Instituciones Campus en pipeline: 20", "Instituciones Programa en pipeline: 5", "Tasa de conversión: 20 %", "Precio Campus: $24,000", "Precio Programa: $90,000", "Revisiones al mes: 10,000", "Tasa de reportes: 2 %", "Costo por revisión: $0.05". Each row has a tiny gray tag reading "inventado" or "supuesto".
->
-> A results card with a toggle "Mensual | Anual" set to Mensual. Rows: "Ingresos: $15,500.00", "Costos: $500.00", "Margen: $15,000.00 (96.8 %)", "Reportes al mes: 200". A note under it: "Instituciones parciales se redondean hacia abajo."
->
-> At the bottom, a full-width navy button: "Guardar escenario" and beneath it a white button with the Google "G" icon: "Inicia sesión con Google para guardar". The screen shows no word "seguro" or "segura" anywhere.
-
-## 5. Flows (Mermaid)
-
-### 5a. Simulator → calculate → save scenario
-
-```mermaid
-flowchart TD
-    A["Open /pricing"] --> B["Simulator loads with labeled defaults"]
-    B --> C["User edits an input"]
-    C --> D{"Valid type and range?"}
-    D -- No --> E["Show inline error on that field, keep last valid result"]
-    E --> C
-    D -- Yes --> F["simulate(inputs): pure function"]
-    F --> G["Show monthly and annual revenue, cost, margin, reports"]
-    G --> H{"Click Guardar escenario"}
-    H --> I{"Signed in?"}
-    I -- No --> J["Sign in with Google"]
-    J --> K{"Auth OK?"}
-    K -- No --> L["Show error, inputs stay on screen"]
-    K -- Yes --> M["Enter scenario name"]
-    I -- Yes --> M
-    M --> N{"Name 1-60 chars and inputs valid?"}
-    N -- No --> M
-    N -- Yes --> O["Insert row in scenarios with user_id = auth.uid()"]
-    O --> P["Scenario appears in Mis escenarios"]
-    P --> Q["Reload: fetch own rows, recompute outputs with simulate()"]
-```
-
-### 5b. Swimlane by actor
-
-```mermaid
-flowchart LR
-    subgraph V["Visitor / Sponsor"]
-        V1["Opens /pricing"]
-        V2["Edits simulator inputs"]
-        V3["Clicks Guardar escenario"]
-        V4["Approves Google sign-in"]
-        V5["Names scenario"]
-        V6["Opens Mis escenarios"]
-    end
-    subgraph APP["Lupa app (Vercel)"]
-        A1["Render tiers and defaults"]
-        A2["Validate and run simulate()"]
-        A3["Check session"]
-        A4["Validate name and inputs again"]
-        A5["Recompute outputs from saved inputs"]
-    end
-    subgraph AUTH["Supabase Auth"]
-        U1["Google OAuth"]
-        U2["Return session JWT"]
-    end
-    subgraph DB["Supabase DB (project semestre)"]
-        D1["INSERT into scenarios, RLS: user_id = auth.uid()"]
-        D2["SELECT from scenarios, RLS returns own rows only"]
-    end
-    V1 --> A1 --> V2 --> A2 --> V3 --> A3
-    A3 -- "no session" --> U1 --> V4 --> U2 --> A3
-    A3 -- "session ok" --> V5 --> A4 --> D1
-    V6 --> D2 --> A5
-```
-
-## 6. Benchmark line
-
-**The best existing solution on Earth for this is ScamShield, a free citizen app and helpline funded by the state because protection is treated as a public good, alongside Whoscall/Truecaller, which are free for users and paid for by businesses and institutions, so that every user report improves the database and the user pays with reports, not money.**
-**Mine differs and localizes by applying that same split to one Mexican problem, fake job offers arriving by WhatsApp, Facebook and job boards: the seeker checks the *offer text* for free and pays only with reports, while the universities, municipalities and state employment services that run the job boards pay for coverage and aggregated patterns.**
-
-## 7. Long view (3 years)
-
-If this works, Lupa becomes the default fraud check behind Mexico's university, municipal and state job boards, so that a seeker meets the semáforo wherever they're already looking for work rather than having to find it. The reports from those portals add up to the country's clearest aggregated map of how job fraud moves by state and channel, and state employment services and foundations pay for that map. The seeker side stays free and anonymous by design, because that is what keeps the reports coming and what makes the institutional price defensible.
-
-## 8. Scope cut: NOT building this week
-
-- **No payments.** No checkout, Stripe, invoicing or CFDI. Pricing is a page and a conversation, not a cart.
-- **No IVA or tax logic** in the simulator (the screen says "antes de IVA").
-- **No Programa dashboard.** The state-level dashboard is described on `/pricing`, not built.
-- **No Campus embed or widget** for institutions' portals.
-- **No checks on posted vacancies and no monthly alert.** Both are part of what Campus includes and appear on `/pricing`, but building them is a later week.
-- **No monthly aggregated report generator.** The first pilot report can be assembled by hand from aggregate counts.
-- **No changes to the check itself.** The semáforo logic, the LLM or simulated output and `fraud_patterns` stay as they are.
-- **No seeker accounts.** Google sign-in is only for saving scenarios. Checking an offer never requires it.
-- **No sharing scenarios** between users, no teams, no public scenario links.
-- **No storing computed outputs.** Only inputs are saved, and outputs are recomputed on load.
-- **No CRM or email sequences** for institutions. The Ibero log is a markdown file, and the one-page proposal is a document, not a page on the site.
-- **No English UI, no multi-currency.**
-- **No real numbers.** Every default is invented or assumed, and labeled.
-
-## 9. Architecture and stack
-
-| Layer | Choice | Status | Notes |
-|---|---|---|---|
-| Hosting | Vercel | Existing | Deploys from `rafapieck/lupa`. Env vars hold all keys. |
-| Repo | GitHub `rafapieck/lupa` | Existing | This file lives at `docs/PACKET.md`. |
-| Frontend | Lupa's current framework | Existing | New routes: `/pricing` (tiers + simulator), `/about` (10:1 memo). The framework wasn't confirmed in this packet, so no assumption is made here. |
-| Simulator logic | `simulate(inputs)`, a pure function with no I/O | **New** | The only place the math lives. Shared by the UI and the tests. Validation is a separate `validateInputs()` used by both the UI and the save path. |
-| Database | Supabase project **"semestre"** | Existing | `fraud_patterns` already exists and is untouched. |
-| Auth | **Supabase Auth with Google** provider | **New** | Used only for saving scenarios. |
-| Scenarios | `public.scenarios` table with **RLS on** | **New** | Schema below. |
-
-### `scenarios` table
-
-```sql
-create table public.scenarios (
-  id                      uuid primary key default gen_random_uuid(),
-  user_id                 uuid not null default auth.uid()
-                          references auth.users (id) on delete cascade,
-  name                    text not null check (char_length(name) between 1 and 60),
-  campus_pipeline         integer not null check (campus_pipeline between 0 and 1000),
-  programa_pipeline       integer not null check (programa_pipeline between 0 and 1000),
-  conversion_rate         numeric(5,2) not null check (conversion_rate between 0 and 100),   -- percent
-  campus_price            integer not null check (campus_price between 0 and 1000000),     -- MXN/yr
-  programa_price          integer not null check (programa_price between 0 and 1000000),   -- MXN/yr
-  checks_per_month        integer not null check (checks_per_month between 0 and 10000000),
-  report_rate             numeric(5,2) not null check (report_rate between 0 and 100),       -- percent
-  cost_per_check          numeric(8,4) not null check (cost_per_check between 0 and 100),    -- MXN
-  review_cost_per_report  numeric(8,2) not null default 0 check (review_cost_per_report between 0 and 1000),
-  formula_version         smallint not null default 1,
-  created_at              timestamptz not null default now(),
-  updated_at              timestamptz not null default now()
-);
-
-alter table public.scenarios enable row level security;
-
-create policy "own scenarios: select" on public.scenarios
-  for select to authenticated using (user_id = auth.uid());
-create policy "own scenarios: insert" on public.scenarios
-  for insert to authenticated with check (user_id = auth.uid());
-create policy "own scenarios: update" on public.scenarios
-  for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "own scenarios: delete" on public.scenarios
-  for delete to authenticated using (user_id = auth.uid());
--- No policy for anon, so anonymous users can't read or write anything.
-```
-
-The database `check` constraints repeat the UI range limits on purpose, so a crafted request that skips the UI is still rejected. `formula_version` lets old scenarios be recomputed correctly if the math changes later.
-
-## 10. Shadow clause → design rules
-
-The shadow of a fraud checker is false reassurance. The shadow of an institutional price is the payer's interests overriding the seeker's. These rules guard against both:
-
-1. **Lupa never says "safe".** Not in English, and not "segura", "confiable" or "legítima" in Spanish. Green reads *"No encontramos señales de alerta"* (we found no warning signs), never "esta oferta es segura". This applies to the semáforo, `/pricing`, `/about`, tier descriptions and marketing copy.
-2. **Checking an offer is never behind a paywall, in any tier.** No check limits, no "premium reasons" and no account required. Paid tiers buy coverage and aggregated reports, never better protection for some seekers.
-3. **Institutions only get aggregated data, never an individual seeker's.** Reports go out as counts and patterns by state, channel and pattern type. No offer text that could identify a seeker, no names, phones, emails, IPs or INE/CURP data. Small groups are suppressed rather than shown (a minimum group size is set when the dashboard is built, out of scope this week, but `/pricing` copy must already promise this).
-4. **The simulator never presents invented numbers as real.** Every default carries its label on screen, and a banner says the data is invented.
-5. **A simulated semáforo says it's simulated.** If the check's output comes from a simulation and not a live analysis, the result screen shows **"Resultado simulado"** next to the semáforo. Whether the output is simulated today gets verified in the repo during the build.
-
-## 11. Security floor checklist
-
-- [ ] **No secrets in the repo.** Supabase service-role key, Google OAuth client secret and any LLM key live only in Vercel env vars or the Supabase dashboard. Only the Supabase URL and anon key reach the browser. A secret scan of the repo is clean before merging.
-- [ ] **The service-role key is never used in client code.** All scenario reads and writes go through the user's session, so RLS applies.
-- [ ] **Auth is required for saved scenarios.** Saving and loading need a Google session, while the simulator itself works signed out.
-- [ ] **RLS is on for `scenarios`**, with policies for select, insert, update and delete scoped to `auth.uid()` and no anon policy.
-- [ ] **Google OAuth redirect URLs are allowlisted** to the production domain and the Vercel preview domain only.
-- [ ] **Every simulator field is validated for type and range**, in the UI and again in the DB:
-
-  | Field | Type | Range | Step |
-  |---|---|---|---|
-  | Campus / Programa pipeline | integer | 0–1,000 | 1 |
-  | Conversion rate | number (%) | 0–100 | 0.01 |
-  | Campus / Programa price | integer (MXN) | 0–1,000,000 | 1 |
-  | Checks per month | integer | 0–10,000,000 | 1 |
-  | Report rate | number (%) | 0–100 | 0.01 |
-  | Cost per check | number (MXN) | 0–100 | 0.0001 |
-  | Review cost per report | number (MXN) | 0–1,000 | 0.01 |
-  | Scenario name | text | 1–60 chars, trimmed | — |
-
-  Empty, NaN, negative, out-of-range, scientific notation like `1e9`, and non-numeric input are rejected with an inline error.
-- [ ] **Only invented or labeled data.** No real institution's numbers appear in defaults or screenshots, and the Ibero log stays in `docs/` and is never shown on a public page without consent.
-- [ ] **Scenario names are rendered as text, never as HTML**, to prevent XSS.
-
-## 12. Test plan
-
-### 12a. Simulator cases, calculated by hand
-
-**Case 1: defaults (the mockup numbers)**
-Inputs: Campus pipeline 20, Programa pipeline 5, conversion 20%, Campus price 24,000, Programa price 90,000, checks 10,000/mo, report rate 2%, cost per check 0.05, review cost 0.
-
-| Step | Arithmetic | Result |
-|---|---|---|
-| Paying Campus | floor(20 × 0.20) = floor(4.0) | **4** |
-| Paying Programa | floor(5 × 0.20) = floor(1.0) | **1** |
-| Annual revenue | 4 × 24,000 + 1 × 90,000 = 96,000 + 90,000 | **$186,000.00** |
-| Monthly revenue | 186,000 ÷ 12 | **$15,500.00** |
-| Reports/month | 10,000 × 0.02 | **200** |
-| Monthly cost | 10,000 × 0.05 + 200 × 0 = 500 + 0 | **$500.00** |
-| Annual cost | 500 × 12 | **$6,000.00** |
-| Monthly margin | 15,500 − 500 | **$15,000.00** |
-| Annual margin | 186,000 − 6,000 | **$180,000.00** |
-| Margin % | 15,000 ÷ 15,500 = 0.96774… | **96.8%** |
-
-**Case 2: no institutions yet (the free side still costs money)**
-Inputs: Campus pipeline 0, Programa pipeline 0, conversion 20%, prices at list, checks 50,000/mo, report rate 3%, cost per check 0.05, review cost 0.
-
-| Step | Arithmetic | Result |
-|---|---|---|
-| Paying Campus / Programa | floor(0 × 0.20) | **0 / 0** |
-| Annual / monthly revenue | 0 | **$0.00 / $0.00** |
-| Reports/month | 50,000 × 0.03 | **1,500** |
-| Monthly cost | 50,000 × 0.05 + 1,500 × 0 | **$2,500.00** |
-| Annual cost | 2,500 × 12 | **$30,000.00** |
-| Monthly margin | 0 − 2,500 | **−$2,500.00** |
-| Annual margin | 0 − 30,000 | **−$30,000.00** |
-| Margin % | revenue = 0, so no division | **"—"** (not NaN, not −∞) |
-
-Also check: the checks stay free and the simulator does **not** suggest charging seekers.
-
-**Case 3: rounding down, custom price, review cost on (a loss)**
-Inputs: Campus pipeline 7, Programa pipeline 3, conversion 15%, Campus price **30,000**, Programa price 90,000, checks 200,000/mo, report rate 1.5%, cost per check 0.05, review cost **1.00**.
-
-| Step | Arithmetic | Result |
-|---|---|---|
-| Paying Campus | floor(7 × 0.15) = floor(1.05) | **1** |
-| Paying Programa | floor(3 × 0.15) = floor(0.45) | **0** |
-| Annual revenue | 1 × 30,000 + 0 × 90,000 | **$30,000.00** |
-| Monthly revenue | 30,000 ÷ 12 | **$2,500.00** |
-| Reports/month | 200,000 × 0.015 | **3,000** |
-| Monthly cost | 200,000 × 0.05 + 3,000 × 1.00 = 10,000 + 3,000 | **$13,000.00** |
-| Annual cost | 13,000 × 12 | **$156,000.00** |
-| Monthly margin | 2,500 − 13,000 | **−$10,500.00** |
-| Annual margin | 30,000 − 156,000 | **−$126,000.00** |
-| Margin % | −10,500 ÷ 2,500 = −4.2 | **−420.0%** |
-
-Also check: the UI shows negative margins clearly (sign and color) and doesn't hide them.
-
-### 12b. Validation cases
-
-| Input | Expected |
-|---|---|
-| Conversion rate = 101 | Rejected: "Debe estar entre 0 y 100". Last valid result stays on screen. |
-| Campus pipeline = 2.5 | Rejected (must be an integer). |
-| Checks per month = −1 | Rejected. |
-| Cost per check = "abc" or empty | Rejected and the field is marked. |
-| Price = 1e9 | Rejected (scientific notation and out of range). |
-| Scenario name = 61 chars or only spaces | Rejected, nothing saved. |
-| A crafted API insert with conversion_rate = 500 | Rejected by the DB `check` constraint. |
-
-### 12c. Auth and RLS checks
-
-| # | Test | Expected |
-|---|---|---|
-| 1 | Signed out: use the simulator | Works fully. "Guardar" prompts Google sign-in. |
-| 2 | Signed out: check a job offer | Works with no sign-in prompt. |
-| 3 | Anon key, no session: `select * from scenarios` | 0 rows (no anon policy). |
-| 4 | Anon key, no session: insert a scenario | Rejected. |
-| 5 | User A saves "Escenario A", then reloads the page | A sees it, and outputs match Case 1 if defaults were saved. |
-| 6 | User B signs in and lists scenarios | B doesn't see "Escenario A". |
-| 7 | User B: `select` A's row by its `id` | 0 rows. |
-| 8 | User B: `update` or `delete` A's row by `id` | 0 rows affected, A's row unchanged. |
-| 9 | User B: insert with `user_id` = A's id | Rejected by the `with check` policy. |
-| 10 | Sign out, then reload `/pricing` | No saved scenarios visible and no cached data from A. |
-| 11 | Search the client bundle for `service_role` or the secret key | Not found. |
-
-### 12d. Design-rule checks
-
-- [ ] Search all UI copy for `safe`, `segur`, `confiable` and `legítim`. No hits in a claim about an offer.
-- [ ] Every tier card on `/pricing` states that checking an offer is free.
-- [ ] Every simulator default shows its label ([INVENTED] or [ASSUMED]), and the "datos inventados" banner is visible.
-- [ ] "Precios antes de IVA" is visible on `/pricing`.
-- [ ] Programa copy says "agregado por estado y canal" and promises no individual data.
-- [ ] In the repo, find where the semáforo output comes from. If it's simulated, every result screen shows "Resultado simulado" (test red, yellow and green). If it's a live call, record that in `docs/DECISIONS.md`.
-- [ ] The Campus card lists "Revisión de las vacantes que publicas, con alerta mensual", and nothing on `/pricing` implies that feature is live today.
+**Not targeting this week:** recruiters and employers, people who already paid (Lupa refers them to 088 and Consejo Ciudadano), phone-call scams, Ibero students as first users.
 
 ---
 
-## Appendix A: 10:1 memo (draft for `/about`)
+## 3. Launch playbook
 
-> **Why Lupa is free for job seekers, and why an institution pays**
->
-> Lupa follows one rule for pricing: whoever uses it should get roughly ten times more value than it costs them. *(Rafael: this memo is drafted in English for review. Translate it for `/about` once the wording is approved.)*
->
-> **For the job seeker, the ratio isn't close.** Lupa costs $0 and about 30 seconds. On the other side is the advance fee a fake recruiter asks for. In the US, the FTC reports a median loss of about US$2,000 per job-scam victim **[CITED, verify]**, roughly $36,000 MXN at an assumed $18 MXN per dollar **[ASSUMED]**. Then there are their documents: an INE or CURP sent to a stranger can be used for fraud long after the fake job disappears. And there is their physical safety: Consejo Ciudadano reports that about 30% of people recruited for exploitation are reached through fake job offers **[CITED, verify]**. Against those costs, any price we charged the seeker would only push them away from checking. So checking an offer is free, in every plan, permanently.
->
-> **For an institution, the ratio holds with one person.** A university or municipal job board pays $24,000 MXN a year for Campus. The money one median victim loses, by the estimate above, is already larger than that license. That's before counting what can't be priced: a student who sent their documents, a family that paid a "training fee", or a student who walked into a meeting that wasn't an interview. If Lupa helps one student on that board avoid one of those outcomes, the license has paid for itself. Every other warning it gives that year is the rest of the ratio.
->
-> **What institutions don't get.** They don't get any individual seeker's data, ever. They get aggregated patterns (which channels, which kinds of offers, which states), so they can warn their community. Lupa never tells anyone an offer is "safe". It tells them what warning signs it found, or that it found none.
->
-> *Figures marked [CITED, verify] need their source links checked before publishing. The exchange rate is an assumption.*
+### 3a. Strategy
 
-## Appendix B: Ibero Bolsa de Trabajo pricing conversation
-
-This is the record for `docs/conversations/ibero.md`. It reflects what Rafael reported and nothing else.
-
-### Log
-
-| Field | Record |
+| | |
 |---|---|
-| Date asked | Tuesday, November 10, 2026 |
-| Channel | Email |
-| To | Ibero Bolsa de Trabajo |
-| Responder | Name not given. The reply came from the Bolsa de Trabajo office. |
-| Question asked (verbatim) | "If Lupa checked every vacancy you publish and warned your students about fake offers, would you pay $24,000 MXN a year?" |
-| Answer | **No, not as asked.** They would need to know much more about the whole thing before deciding. |
-| What it means | The price wasn't rejected. The proposal was too thin. **The blocker is information, not the number.** |
-| Next step | Send a one-page proposal (outline below) and ask for a 20-minute meeting. |
-| Price change? | None. $24,000 MXN/yr stays until a conversation gives a reason about the number itself. |
+| **Audience** | Job seekers in Facebook job groups and WhatsApp (section 2). |
+| **Need** | Decide in minutes, alone, whether to pay or send documents to a “recruiter” who is pushing for today. |
+| **Positioning** | *The second opinion before you pay.* The only free check made for Mexican job scams that shows the official source of every warning sign. |
+| **Supporting evidence** | 5 of 5 Week 13 users had been asked for money ($250–$1,000 MXN) before working. User #3 got suspicious because of same-day pressure. Channel mix from Consejo Ciudadano **[CITED]**. Every pattern in `fraud_patterns` names its source (Policía Cibernética CDMX, Guardia Nacional, SSC). |
+| **The promise we will NOT make** | **“Te decimos si una oferta es real o segura.”** Lupa only says which known warning signs it found. Green means “no encontramos señales”, never “safe”. |
 
-### What I learned
+### 3b. Brand
 
-- An email with one sentence and one price isn't enough for an institution to decide. They need to see the whole thing first.
-- A "no" here is not evidence against $24,000. It's evidence that the offer needs to be explained.
-- The question promised that Lupa would **check every vacancy they publish**, and that is part of Campus. The proposal has to explain it next to the student-side check and the monthly reports, and be honest that it's still being built.
+**Voice rules (three):**
+1. **Like a cousin who already went through it.** *Tú*, short sentences, everyday words (*chamba*, *depósito*). No legal or tech jargon.
+2. **Every warning names its source.** If we can’t cite an official alert, we don’t say it.
+3. **End with one action, never with fear.** No “¡CUIDADO!”, no skulls, no countdowns. One calm next step.
 
-### One-page proposal outline (for Ibero, Campus tier)
+**One weak line, rewritten:**
 
-Target: one page, in Spanish, sent by email to the Bolsa de Trabajo office.
+| Before (current site description) | After |
+|---|---|
+| “Pega una oferta de trabajo y Lupa te dice si tiene señales de fraude.” | “¿Te piden dinero antes de contratarte? Pega la oferta y ve qué señales de fraude tiene y de qué alerta oficial viene cada una.” |
 
-1. **The problem, in their terms (2–3 lines).** Fake job offers reach students on job boards, WhatsApp and Facebook. They cost students advance fees and documents (INE/CURP), and sometimes put them at risk. Use only the [CITED, verify] figures from Appendix A, with their sources.
-2. **What Lupa is (2 lines).** A student pastes an offer and gets a semáforo (red / yellow / green) with the reasons, plus a report button. It's free for students in every plan, needs no account, and never says an offer is "segura".
-3. **What Campus includes.**
-   - Lupa's check made available to Ibero students from the Bolsa de Trabajo portal.
-   - **Checks on the vacancies Ibero posts, with a monthly alert** about any that show warning signs. Say plainly that this is in development and give no launch date, because it isn't built yet (§8).
-   - **A monthly aggregated report** of fraud patterns seen by Ibero's users (channels, types of offer, warning signs).
-4. **How it works with their portal.** For the pilot, the portal adds a visible link or button ("Revisa esta oferta con Lupa") that opens lupaempleo.xyz. There's no integration work on their side. An embedded widget is a later option and isn't built yet (see §8).
-5. **Data: aggregated only.** Ibero never receives any individual student's data, and Lupa doesn't ask students to identify themselves. Reports contain counts and patterns only, and small groups are suppressed.
-6. **Price.** $24,000 MXN a year, before IVA, for one portal. One sentence on the 10:1 logic: one avoided case is worth more than the license.
-7. **Pilot: 1 month, free.** Success means (a) the number of checks that come from the Bolsa de Trabajo portal and (b) one aggregated report delivered at the end of the month.
-8. **The ask.** A 20-minute meeting, with two or three proposed time slots and a single contact person.
+*Why:* the old line starts with the product. The new one starts with the user’s moment (the money request), keeps the promise narrow (signals, not “real or fake”) and adds the trust reason (official source).
 
-Don't include features outside this packet, real numbers from other institutions, or anything that suggests Lupa guarantees an offer is legitimate.
+**Palette** (reuses the app and the Week 14 mockup, so the cards and the site look like one thing):
+
+| Role | Color | Use |
+|---|---|---|
+| Ink | Navy `#1B2A41` | Text, background of the series band |
+| Accent | Amber `#F2A900` | Series label, highlights, the Lupa mark |
+| Surface | White `#FFFFFF` / Gray `#F3F4F6` | Card backgrounds |
+| Semáforo | Tailwind red-700 / amber-300 / green-700 (already in `result-view.tsx`) | Only on verdict cards, never decoration |
+
+**Type hierarchy** (system sans-serif, as on the site; no web fonts, so cards load fast on limited data):
+
+| Level | Size on a 1080-px card | Weight |
+|---|---|---|
+| Series label | 34 px, all caps | Bold, amber |
+| Headline (the signal) | 72–84 px, max 8 words | Bold, navy |
+| Body | 40 px, max 30 words | Regular |
+| Source chip | 30 px | Regular, gray, starts with “Fuente:” |
+| Footer | 30 px | Bold: `lupaempleo.xyz` |
+
+**Repeatable layout, “la tarjeta Lupa”:** top band (series label) → one big line (the signal) → one body line → source chip → footer with one action and `lupaempleo.xyz`. Same five slots in every format; only the proportions change.
+
+**Fit with the audience and the Mexican context:**
+- **The semáforo is already familiar.** Mexicans read red, yellow and green as risk levels from the COVID *semáforo epidemiológico*.
+- **WhatsApp is how warnings travel** in families and job groups, so every asset is a single image or link that previews well when forwarded.
+- **Android on limited data:** cards are PNGs under 150 KB, with no video autoplay and no web fonts.
+- **Official sources build trust**, because scammers impersonate brands. Naming Policía Cibernética or Guardia Nacional is the difference between Lupa and one more anonymous post.
+
+### 3c. Creative range: 3 series × 2 concepts
+
+| Series | Purpose | Concept 1 (status) | Concept 2 (status) | Format |
+|---|---|---|---|---|
+| **A · Señal de la semana** | Teach one fraud signal at a time, with its source | **A1 “Te piden dinero antes de contratarte”** (pattern `upfront_payment`, Policía Cibernética CDMX). **FINISHED** | A2 “Te piden tu INE por WhatsApp” (`personal_documents`, Guardia Nacional). Sketch: headline only | Square 1080×1080 PNG (Facebook group post) |
+| **B · La revisé con Lupa** | Show the method: real input → verdict | **B1 the shared verdict card** from one real offer (section 3d). **FINISHED** | B2 “Chamba en el Mundial 2026”: a seasonal offer type flagged by SSC CDMX in May 2026. Sketch: headline + which patterns it would hit | Link preview 1200×630 (WhatsApp / Facebook) |
+| **C · Antes de depositar** | A pause the person can use without Lupa | **C1 “3 cosas antes de depositar”**: 1) ¿te piden dinero antes de contratarte? 2) ¿la empresa tiene dirección y RFC? 3) pega la oferta en Lupa. **FINISHED** | C2 “Qué contestarle al reclutador”: reuses the `reply_es` lines that already exist. Sketch: headline + one reply | Vertical 1080×1920 PNG (WhatsApp status) |
+
+Three finished assets (A1, B1, C1) across three formats. A2, B2 and C2 stay as purposeful sketches in `docs/content/CONCEPTS.md`.
+
+**All three finished assets are drawn by Lupa itself** from the same data the checker uses (section 7, F1 and F3). A signal changes in `fraud_patterns`, and the card changes with it. That is the method feeding the audience: no copy can drift from the source.
+
+### 3d. The method: one real input → useful output
+
+**Input:** a real job offer from a public Facebook job group, copied by Rafael with the recruiter’s phone, names and links removed before pasting. **[TO FILL: date and group type, never the group’s name or the poster.]** If no public post fits during the week, the fallback input is the offer pattern described in the public Policía Cibernética CDMX alert of May 2026 (“Te pagamos 2,800 al día”), clearly labeled *“reconstruido a partir de una alerta pública”*.
+
+**Method (6 roles, separate chats, human approval at the end):**
+
+| # | Role | Input | Output | Quality check |
+|---|---|---|---|---|
+| 1 | **Research** | The pattern row from `fraud_patterns` + its official alert | A 3-line fact sheet with the alert’s link | Rafael opens every link. No link, no fact. |
+| 2 | **Writing** | Fact sheet + the three voice rules | Headline ≤ 8 words, body ≤ 30 words, one action | Word counts, *tú*, no “segura/confiable/legítima”, ends in an action |
+| 3 | **Visual production** | Approved copy + layout slots | The card, rendered by `/api/card` (or `/s/...` for B1) | Readable at 390 px wide, < 150 KB, contrast passes |
+| 4 | **Evidence / claim check** | Draft card + fact sheet | Pass/fail per claim | Any claim without a source is cut, not softened |
+| 5 | **Style review** | Draft card + this section 3b | Checklist: palette, type, 5 layout slots, voice | All boxes pass or go to revision |
+| 6 | **Revision** | Findings from 4 and 5 | v2 of the card | Roles 4 and 5 run again on v2 |
+| ✋ | **Human approval** | v2 + both checklists | Rafael’s sign-off line in `docs/content/APPROVALS.md` (date, asset, “aprobado”) | Nothing is posted without this line |
+
+For B1 the “visual production” role is the product itself: paste the offer → Lupa returns the verdict → tap **“Mandar aviso por WhatsApp”** → the card at `/s/...` is the asset. The pasted text never leaves the check screen.
+
+### 3e. Distribution test
+
+- **Channel: one Facebook job group in CDMX/Edomex**, posted **only with the admin’s permission** (asked by Messenger first; the request and answer are logged without names). If no admin answers by Wednesday, the fallback is Rafael’s own WhatsApp status, which only his contacts who choose to open it will see.
+- **Two pieces:** A1 (square image, posted with the link) and B1 (the shared verdict link).
+- **Working next action:** each link opens Lupa’s check with a source tag: `lupaempleo.xyz/?src=fb_group` (or `?src=wa_status`). The tag is the “capture”: it counts checks per channel without collecting anything about the person.
+- **What gets counted (aggregate only):** checks with `source = fb_group` (or `wa_status`), how many of them came back 🔴/🟡, and how many verdicts were shared (`check_events.kind = 'shared'`). Plus what Facebook shows the poster (reactions, comments, shares), copied as numbers with no names.
+- **No** engagement bait, purchased reach, giveaways, fake comments, or Rafael asking friends to like the post.
+
+### 3f. Honest results (filled after the test)
+
+| | Expected [ASSUMED] | What actually happened [TO FILL] |
+|---|---|---|
+| Admin permission | 1 of 3 admins says yes | |
+| Post reach (what Facebook shows) | 300–800 views | |
+| Checks with `src` tag in 72 h | 5–15 | |
+| Of those, 🔴 or 🟡 | ≥ 50% | |
+| Verdicts shared | 1–3 | |
+| Comments asking “¿esta es real?” | 1–2 | |
+| **Keep** | | |
+| **Change** | | |
+
+Zero is a valid result and gets reported as zero. No personal data, screenshots with names, or profile pictures go into this table, the repo or the demo.
+
+---
+
+## 4. Success definition
+
+Before the module closes, all of this works on the live site:
+
+1. **The share flow works.** On a 🔴 or 🟡 result, a button **“Mandar aviso por WhatsApp”** opens WhatsApp with a short message and a link to `/s/<verdict>/<pattern ids>`. That page shows the verdict card (signals, official sources, one action, “Revisa tu oferta” button) and has a 1200×630 link preview image. **No offer text, company name, phone or date of the original check appears on it.**
+2. **Green is never shareable.** There is no share button on 🟢, and `/s/green/...` returns 404. A shared “no encontramos señales” card would read as an endorsement of the offer.
+3. **Source tags are counted.** `?src=` on any page is kept for the visit and saved with the check, from a fixed list only (`fb_group`, `wa_status`, `wa_share`, `direct`). Anything else is ignored.
+4. **`shared` is a new event kind** in `check_events`, logged when the share button is tapped.
+5. **`/api/card` renders the series cards** (A1 square, C1 vertical) from `fraud_patterns`, in the brand layout, as PNG.
+6. **`/contenido` is live:** the campaign page with the three series, the three finished assets, the three sketches as text, the “promise we won’t make”, and a “Revisa una oferta” button tagged `?src=contenido`. (`contenido` joins the source list.)
+7. **Masking before the AI call (Week 15 shadow decision).** Phone numbers, emails, URLs and INE/CURP-shaped strings are replaced with `[teléfono]`, `[correo]`, `[liga]`, `[documento]` before the text goes to Gemini. Keyword rules still run on the full text on the server. Verdicts on the 5 PACKET test offers don’t change.
+8. **The site description is the rewritten line** (section 3b).
+9. **`docs/content/`** holds `CONCEPTS.md` (6 concepts), `METHOD.md` (the 6 roles with the B1 walk-through) and `APPROVALS.md` (Rafael’s sign-off lines).
+10. **Persona test done** in a fresh chat (section 12d), recorded in `docs/PERSONA_TEST_WEEK15.md`, with the worst confusion fixed and retested.
+
+## 5. Mockup: image-generation prompt
+
+> A high-fidelity pair of mobile screenshots side by side, iPhone-size portrait (390×844), for a Mexican job-fraud checker called “Lupa”. Clean civic-tech style: white background, deep navy text (#1B2A41), warm amber accent (#F2A900), soft gray cards with 12px rounded corners, simple sans-serif font. No people, no stock photos, no skulls or warning triangles.
+>
+> **Left screen, the result page after a check:** a large red rounded badge reading “Riesgo alto”, then a card titled “Encontramos 2 señales de alerta” with two rows: “Te piden dinero antes de contratarte · Fuente: Policía Cibernética CDMX” and “Te piden tu INE por mensaje · Fuente: Guardia Nacional”. Below, a full-width green WhatsApp-style button with a share icon: “Mandar aviso por WhatsApp”, and under it in small gray text: “No mandamos el texto de la oferta, solo las señales.”
+>
+> **Right screen, a WhatsApp chat preview** of the shared link: a link card with a 1200×630 image. The image has a navy top band with the amber label “LA REVISÉ CON LUPA”, a red badge “Riesgo alto”, the two signals in big navy text, a gray line “Fuente: Policía Cibernética CDMX · Guardia Nacional” and a footer “Revisa la tuya en lupaempleo.xyz”. Below the card, the message text: “Esta oferta tiene señales de fraude. Revísala antes de pagar.” The words “segura” or “seguro” appear nowhere.
+
+## 6. Flows (Mermaid)
+
+### 6a. Share a verdict and bring the next person in
+
+```mermaid
+flowchart TD
+    A["Seeker pastes an offer at lupaempleo.xyz"] --> B["Mask phones, emails, links, IDs"]
+    B --> C["Gemini extracts signals + keyword guard on full text"]
+    C --> D["Rules compute verdict"]
+    D --> E{"Verdict"}
+    E -- "Green" --> F["Result + next step. No share button"]
+    E -- "Red or yellow" --> G["Result + 'Mandar aviso por WhatsApp'"]
+    G --> H["Log check_events kind = shared"]
+    H --> I["WhatsApp opens with message + link /s/verdict/patterns"]
+    I --> J["Friend or group opens /s/... (card + sources, no offer text)"]
+    J --> K["'Revisa tu oferta' → /?src=wa_share"]
+    K --> A
+```
+
+### 6b. Swimlane by actor (distribution test)
+
+```mermaid
+flowchart LR
+    subgraph R["Rafael"]
+        R1["Asks group admin for permission"]
+        R2["Approves asset in APPROVALS.md"]
+        R3["Posts A1 + B1 with ?src=fb_group"]
+        R4["Reads aggregate counts after 72 h"]
+    end
+    subgraph G["Facebook job group"]
+        G1["Admin says yes / no"]
+        G2["Member sees post"]
+        G3["Member taps link"]
+    end
+    subgraph APP["Lupa app (Vercel)"]
+        A1["Keeps src for the visit"]
+        A2["Check: mask → signals → verdict"]
+        A3["Optional share → /s/..."]
+    end
+    subgraph DB["Supabase 'semestre'"]
+        D1["checks: verdict, patterns, source (no text)"]
+        D2["check_events: shared, intent"]
+    end
+    R1 --> G1 --> R2 --> R3 --> G2 --> G3 --> A1 --> A2 --> D1
+    A2 --> A3 --> D2
+    D1 --> R4
+    D2 --> R4
+```
+
+## 7. Features to build
+
+| # | Feature | Commit message |
+|---|---|---|
+| F1 | `/s/[verdict]/[patterns]` share page + 1200×630 OG image (B1). Green → 404. Unknown pattern ids → 404. Max 6 patterns. | `feat: shareable verdict card` |
+| F2 | “Mandar aviso por WhatsApp” button on 🔴/🟡 results (`https://wa.me/?text=...`), logs `shared` event | `feat: share verdict to WhatsApp` |
+| F3 | `/api/card?series=a&pattern=<id>` (1080×1080) and `?series=c` (1080×1920) PNGs from `fraud_patterns` | `feat: series cards rendered from patterns` |
+| F4 | `?src=` capture (fixed list, kept in `sessionStorage`), saved in `checks.source` | `feat: count checks by source` |
+| F5 | Masking before Gemini (`lib/mask.ts`) | `feat: mask personal data before the AI call` |
+| F6 | `/contenido` page + rewritten site description + header link “Contenido” | `feat: launch content page` |
+| F7 | `docs/content/` (CONCEPTS, METHOD, APPROVALS) + this packet’s results section filled after the test | `docs: launch playbook evidence` |
+
+At least two deploys during the week (after F2 and after F6), on top of the existing history.
+
+## 8. Global benchmark / local adaptation
+
+**The best existing solution on Earth for this is Singapore’s ScamShield Bot, which lives inside WhatsApp: people paste, screenshot or forward a suspicious message and get a check, and every report goes to police review.** Bitdefender’s Scamio does the same for free across WhatsApp, Messenger and the web. **Mine differs and localizes by** focusing on one Mexican problem, fake job offers, and showing the Mexican official alert behind every signal. A WhatsApp bot isn’t free to run since Meta began charging per service message on October 1, 2026 **[CITED]**. So Lupa meets people in the chat the other way around: the *verdict* travels into WhatsApp as a link card, at no cost per message.
+
+## 9. Long view (3 years)
+
+Lupa becomes the warning people forward. Every shared card brings the next person to a check, and every check feeds an anonymous, sourced map of how job fraud moves by channel and state. Universities, municipalities and state employment services pay for that map and for Lupa on their portals (Week 14 tiers). When a payer signs, Lupa moves to Gemini’s paid tier and can afford a WhatsApp number of its own. Checking stays free and anonymous, and Lupa still never says “safe”.
+
+## 10. Scope cut: NOT building this week
+
+- **No WhatsApp bot** or WhatsApp Business API number (cost per message; Charter scope rule).
+- **No screenshot / image input** for the check.
+- **No public social account** for Lupa and no scheduled posting.
+- **No automation pipeline or agent framework.** The 6 roles are separate chats plus Rafael’s approval.
+- **No share on green**, no share of the offer text, ever.
+- **No stored offer text, IP, user agent or name**, including in `checks.source`.
+- **No changes** to scoring, weights, `fraud_patterns` content, pricing or auth.
+- **No video assets.** Images and link previews only.
+- **No paid ads**, giveaways or boosted posts.
+
+## 11. Architecture and stack
+
+| Layer | Choice | Status | Notes |
+|---|---|---|---|
+| Hosting | Vercel, deploys from `main` | Existing | |
+| Frontend | Next.js 16 App Router + Tailwind 4 | Existing | New routes: `/s/[verdict]/[patterns]`, `/contenido`, `/api/card` |
+| Images | `next/og` `ImageResponse` | **New** | Card PNGs and the share OG image, drawn from `lib/patterns.ts` |
+| AI | Gemini Flash-Lite via `GEMINI_MODEL` | Existing | Now receives masked text (F5) |
+| Masking | `lib/mask.ts`, pure function | **New** | Runs inside `/api/check` before `extractSignals()` |
+| Database | Supabase “semestre” | Existing | `checks.source` column + `shared` event kind (SQL below, run by Rafael) |
+
+```sql
+-- Week 15: count checks by source + a 'shared' event. Run in the SQL editor. Idempotent.
+alter table public.checks
+  add column if not exists source text null
+  check (source is null or source in ('fb_group','wa_status','wa_share','contenido','direct'));
+
+revoke all on public.checks from anon, authenticated;
+grant insert (id, verdict, score, pattern_ids, simulated, repeat_visit, example, source)
+  on public.checks to anon;
+
+alter table public.check_events drop constraint if exists check_events_kind_check;
+alter table public.check_events
+  add constraint check_events_kind_check check (kind in ('reply_copied','intent','shared'));
+-- answer stays null for 'shared' (the existing kind/answer constraint is updated the same way):
+alter table public.check_events drop constraint if exists check_events_answer_matches_kind;
+alter table public.check_events add constraint check_events_answer_matches_kind check (
+  (kind = 'intent' and answer is not null) or (kind in ('reply_copied','shared') and answer is null)
+);
+
+-- Founder query, SQL editor only:
+--   select source, verdict, count(*) from public.checks
+--    where created_at > now() - interval '7 days' and not example
+--    group by source, verdict order by source;
+```
+
+RLS is unchanged: `checks` and `check_events` stay insert-only for `anon`, with no select policy.
+
+## 12. Shadow clause → design rules
+
+The shadow of distribution is that **a warning becomes an endorsement or a leak**. A shared green card would read as “Lupa says this job is real”. A shared card with the offer text would spread the recruiter’s number, or the seeker’s own name. A growth push would tempt fear-bait and invented numbers.
+
+1. **Never share green.** No button, and `/s/green/...` is a 404.
+2. **A shared card carries signals and sources only.** No offer text, company, phone, date or check id. It is rebuilt from pattern ids, so it can’t be edited to say something Lupa didn’t say. Unknown ids → 404.
+3. **Mask before the AI.** Personal data in a pasted offer doesn’t reach Google (F5).
+4. **No invented results.** Section 3f is filled with real counts or “0”. Simulated persona evidence is labeled as simulation.
+5. **Never “safe”, in content too.** The copy audit test now covers `/s/...`, `/contenido` and the card routes.
+6. **Human approval before anything is posted** (`APPROVALS.md`).
+7. **Counts only, in aggregate.** The source tag says where a visit came from, never who.
+
+## 13. Security floor checklist
+
+- [ ] No secrets in the repo; `GEMINI_API_KEY` and Supabase keys stay in Vercel env vars. Diff scan before every push (`service_role`, `secret`, `sk-`, `AIza`).
+- [ ] No new personal data is collected. `source` is a fixed enum, checked in the app **and** in the DB.
+- [ ] RLS stays on for `checks`, `check_events`, `scenarios`; no new select policies.
+- [ ] `/s/[verdict]/[patterns]` validates the verdict (`red` | `yellow`), every pattern id against `lib/patterns.ts`, max 6 ids, max URL segment 200 chars.
+- [ ] `/api/card` validates `series` (`a` | `c`) and `pattern` against the list; anything else → 400.
+- [ ] `?src=` is accepted only from the fixed list; anything else is dropped, never stored or echoed.
+- [ ] The check input keeps its existing type and length limits; masking runs after validation and before Gemini.
+- [ ] The demo offer and all content examples are invented or masked and labeled.
+
+## 14. Test plan
+
+### 14a. Masking (`lib/mask.test.ts`)
+
+| Input contains | Expected after masking |
+|---|---|
+| `55 1234 5678`, `+52 1 55 1234 5678`, `5512345678` | `[teléfono]` |
+| `reclutamiento.mx@gmail.com` | `[correo]` |
+| `https://bit.ly/abc`, `wa.me/5215512345678` | `[liga]` |
+| A CURP-shaped string (18 chars, e.g. invented `GOPK010203MDFRRL09`) | `[documento]` |
+| “$500 para tu uniforme”, “contratación HOY” | Unchanged (signals must survive) |
+| The 5 PACKET test offers | Same verdict as before masking (regression) |
+
+### 14b. Share and cards
+
+| Test | Expected |
+|---|---|
+| 🔴 result | “Mandar aviso por WhatsApp” visible; tapping logs `shared` and opens `wa.me` |
+| 🟢 result | No share button |
+| `/s/red/upfront_payment,personal_documents` | 200, both signals with sources, “Revisa tu oferta” → `/?src=wa_share` |
+| `/s/green/upfront_payment` | 404 |
+| `/s/red/fake_id` or 7 ids | 404 |
+| `/s/...` HTML | Contains no offer text, phone, check id or date |
+| `/s/...` `og:image` | 1200×630 PNG |
+| `/api/card?series=a&pattern=upfront_payment` | 1080×1080 PNG, < 150 KB |
+| `/api/card?series=c` | 1080×1920 PNG, < 150 KB |
+| `/api/card?series=z` | 400 |
+
+### 14c. Source capture
+
+| Test | Expected |
+|---|---|
+| Open `/?src=fb_group`, then check an offer | Row saved with `source = 'fb_group'` |
+| Open `/?src=<script>` | Ignored; row saved with `source = null` |
+| Crafted insert with `source = 'tiktok'` | Rejected by the DB check constraint |
+| Anon `select` on `checks` | 0 rows |
+
+### 14d. Persona test (fresh chat, synthetic, labeled as simulation)
+
+Persona: **Jorge, 27, Iztapalapa** (`docs/PERSONAS.md`), research-grounded in the Week 13 sessions and the Consejo Ciudadano channel data. Walk-through: sees A1 in a Facebook group → taps the link → checks an offer → shares the 🔴 verdict to his cousin → the cousin opens `/s/...`. Record each confusion and the response in `docs/PERSONA_TEST_WEEK15.md`, fix the worst one that reproduces on the live site, and retest. If every step passes, say so; don’t invent a bug.
+
+### 14e. Copy audit
+
+The existing test that bans `segur`, `confiable`, `legítim` extends to `/s/...`, `/contenido`, `/api/card` text and the WhatsApp message.
+
+---
+
+## Appendix: DEMO script (3:00 + 0:30)
+
+1. **0:00–0:30** The problem in one line + the first-audience change (brief).
+2. **0:30–1:15** The method: one real (masked) offer → check → 🔴 → “Mandar aviso por WhatsApp” → the `/s/...` card in a WhatsApp preview.
+3. **1:15–2:00** The playbook: `/contenido` with A1, B1, C1, the three sketches, the voice rules and the promise we won’t make.
+4. **2:00–2:40** The test: channel, what I expected, what actually happened (the real counts, including zeros).
+5. **2:40–3:00** Security and shadow: masking, never share green, no offer text in a card.
+6. **3:00–3:30** What changed my mind: the evidence that my first audience wasn’t the job board.
