@@ -820,7 +820,7 @@ Rafael reported the results; packet §3f is filled with them as given. No number
   - `checks.simulated` is unchanged, and the label stays honest: the screen still says no AI was used this time.
 - **Supersedes:** the on-screen "(motivo: …)" from earlier today (967f56b). To diagnose from a phone now, read the JSON from `/api/check`, or ask the agent.
 - **Tests:** the copy audit and `screens.test.tsx` check the new wording, and that the visible text has no "simulad", "motivo" or error codes.
-- **Record:** `docs/PERSONA_TEST_WEEK15.md`, marked SIMULACIÓN. Jorge's table didn't arrive with Rafael's message, so it's a marked placeholder until he pastes it. The retest is pending (Rafael, live site).
+- **Record:** `docs/PERSONA_TEST_WEEK15.md` is Rafael's document (sent as a PDF, transcribed to Markdown word for word), marked SIMULATION, with commit `245f1f7` filled in. Still pending: the persona chat link and the retest on the live site (Rafael).
 - **Other confusions, logged as pending (not built):**
   1. "Precios" in the top menu, on a site for job seekers.
   2. The `.xyz` domain looks untrustworthy.
