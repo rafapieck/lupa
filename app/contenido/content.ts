@@ -1,4 +1,4 @@
-import { CARD_FOOTER, SERIES_A, SERIES_C } from "@/lib/cards";
+import { CARD_FOOTER, CARD_VERSION, SERIES_A, SERIES_C } from "@/lib/cards";
 import { OFFER_3 } from "@/lib/fixtures/offers";
 import { keywordSignals } from "@/lib/keywords";
 import { LOCAL_PATTERNS } from "@/lib/patterns";
@@ -37,7 +37,7 @@ export const SERIES: Series[] = [
     format: "Imagen cuadrada para grupos de Facebook",
     finished: {
       name: `A1: ${pattern("upfront_payment").label_es}`,
-      src: "/api/card?series=a&pattern=upfront_payment",
+      src: `/api/card?series=a&pattern=upfront_payment&v=${CARD_VERSION}`,
       ...SERIES_A.size,
       alt: `Tarjeta ${SERIES_A.label}: ${pattern("upfront_payment").label_es}. Fuente: ${pattern("upfront_payment").source}.`,
     },
@@ -60,9 +60,8 @@ export const SERIES: Series[] = [
       note: B1_LABEL,
     },
     sketch: {
-      name: "B2: Chamba en el Mundial 2026",
+      name: "B2: Chamba en el Mundial 2026: un tipo de oferta de temporada",
       lines: [
-        "Un tipo de oferta de temporada que señaló la SSC CDMX en mayo de 2026.",
         `Con la oferta de prueba del Mundial, Lupa encuentra: ${mundial.matches.map((m) => m.label).join("; ")}.`,
       ],
     },
@@ -74,7 +73,7 @@ export const SERIES: Series[] = [
     format: "Imagen vertical para estados de WhatsApp",
     finished: {
       name: `C1: ${SERIES_C.headline}`,
-      src: "/api/card?series=c",
+      src: `/api/card?series=c&v=${CARD_VERSION}`,
       ...SERIES_C.size,
       alt: `Tarjeta ${SERIES_C.label}: ${SERIES_C.lines.map((l, i) => `${i + 1}. ${l}`).join(" ")} ${CARD_FOOTER}.`,
     },

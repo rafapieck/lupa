@@ -68,3 +68,21 @@ describe("card fonts (Inter Bold, OFL)", () => {
     expect(buf.byteLength).toBeLessThan(150 * 1024);
   });
 });
+
+describe("card versions on /contenido", () => {
+  it("embeds A1 and C1 with the current card version, and /api/card ignores the extra param", async () => {
+    const { SERIES } = await import("@/app/contenido/content");
+    const { CARD_VERSION } = await import("@/lib/cards");
+    const srcs = SERIES.map((s) => s.finished.src);
+    expect(srcs).toContain(`/api/card?series=a&pattern=upfront_payment&v=${CARD_VERSION}`);
+    expect(srcs).toContain(`/api/card?series=c&v=${CARD_VERSION}`);
+    for (const src of srcs.filter((s) => s.startsWith("/api/card"))) expect((await get(src.slice("/api/card".length))).status).toBe(200);
+  });
+
+  it("B2 names no unverified source or date", async () => {
+    const { SERIES } = await import("@/app/contenido/content");
+    const b = SERIES.find((s) => s.id === "b")!;
+    expect(b.sketch.name).toBe("B2: Chamba en el Mundial 2026: un tipo de oferta de temporada");
+    expect(JSON.stringify(b.sketch)).not.toMatch(/SSC|mayo|2026\./);
+  });
+});
