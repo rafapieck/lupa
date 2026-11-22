@@ -50,7 +50,7 @@
 
 ## Retest (same offer, live site, after the fix)
 
-[TO FILL: what the note says now, and whether Jorge’s worst confusion is gone. Screenshot in the DEMO.]
+**Done by Rafael in Safari, 2026-11-22, same offer, live site.** The note now reads: *“Esta vez la revisión se hizo sin IA, solo con nuestras señales de alerta oficiales. El resultado siempre lo deciden estas señales.”* Neither “simulado” nor the reason appears on screen. **Jorge’s worst confusion is resolved.** Screenshot: in the DEMO.
 
 ## Deferred (not fixed in this round)
 
