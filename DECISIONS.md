@@ -697,3 +697,59 @@ The source scan still covers all of `app/`, plus `lib/share.ts` and `lib/cards.t
    - Packet §3d still mentions a May 2026 Policía Cibernética alert as the fallback input for B1. Rafael didn't ask to change it, so it's flagged for him rather than edited.
 - Tests: `Test Files  30 passed (30) · Tests  350 passed (350)` (2 new: card URLs carry the version, and B2 names no source or date).
 - **Packet §3d** (Rafael, 2026-11-22): the B1 fallback no longer cites the unverified "Policía Cibernética CDMX alert of May 2026". It now reads: if no real public offer fits, use an invented test offer labeled "Ejemplo con datos de prueba".
+
+## 2026-11-22 — Week 15 F7: launch playbook evidence
+
+### Content docs
+- `docs/content/CONCEPTS.md`: the 6 concepts. A1, B1 and C1 are **finished**; A2, B2 and C2 are **sketches**. Each has its asset URL or sketch text.
+- `docs/content/METHOD.md`:
+  - The 6 roles from packet §3d as a table, plus human approval.
+  - The B1 walk-through: input → masked → signals → verdict → card. No real public offer has been chosen yet (§3d input is "[TO FILL]"), so it uses an **invented** offer labeled "Ejemplo con datos de prueba". Every output shown was produced by the repo's code.
+- `docs/content/APPROVALS.md`: an empty table (fecha · asset · aprobado por Rafael). Rafael fills it in M3.
+- Packet §3f "[TO FILL]" cells are untouched; Rafael fills them with the real numbers after the test.
+
+### Full suite
+`Test Files  30 passed (30) · Tests  350 passed (350)`. ESLint and `tsc` are clean. The last `next build` passed (6386b16; since then only docs and two content strings changed).
+
+### Packet §12: shadow clause → design rules
+1. ✅ **Never share green.** `shareLinkFor()` returns null on green, so there's no button. `/s/green/…` gives a real 404 through `proxy.ts`. Tested in `share.test.tsx` and `share-whatsapp.test.tsx`.
+2. ✅ **Signals and sources only.** The card is rebuilt from pattern ids. Unknown ids, more than 6 ids, or a verdict that doesn't match the ids → 404. No offer text, phone, date or check id appears in the HTML, the OG image or the WhatsApp message (tests).
+3. ✅ **Mask before the AI.** `maskForAI()` runs before Gemini, and the keyword guard reads the original text (F5 tests). In production it takes effect once the Gemini key is renewed (known pending: motivo auth).
+4. ✅ **No invented results.** §3f is untouched. The METHOD walk-through and B1 are labeled "Ejemplo con datos de prueba". Unverified sources were removed from B2 and §3d; other unlinked `[CITED]` figures in the packet were reported to Rafael, not changed.
+5. ✅ **Never "safe", in content too.** The copy audit covers `/s/…`, `/contenido`, card and OG text, and the WhatsApp message. The only allowed "es real" is the negated promise line.
+6. ✅ (process) **Human approval before posting.** `APPROVALS.md` exists and is empty. Nothing has been posted by the build.
+7. ✅ **Counts only, in aggregate.** `checks.source` is one of 5 fixed values or null. No IP, user agent or cookie is stored.
+
+### Packet §13: security floor checklist
+- ✅ **No secrets in the repo.** A diff scan ran before every push this week. A full-repo scan for `service_role`, `sk-…`, `AIza…` and JWT shapes outside tests and docs found nothing. Keys stay in Vercel.
+- ✅ **No new personal data.** `source` is a fixed enum, checked in the app (`toSource`, browser and server) and in the DB (§11 constraint, M1).
+- ✅ **RLS stays on, with no new select policies.** No SQL in this week's code touches policies. The §11 SQL only adds a column, grants and constraints, and Rafael confirmed in M1 that the RLS shield still showed enabled.
+- ✅ **`/s/[verdict]/[patterns]` validates:** red or yellow only, every id from `lib/patterns.ts`, at most 6 ids, segment ≤ 200 chars, plus the verdict must match the ids.
+- ✅ **`/api/card` validates** `series` (a or c) and `pattern` against the list; anything else → 400 (tests).
+- ✅ **`?src=` from the fixed list only.** Anything else is dropped, never stored or echoed (unit tests plus a real browser check).
+- ✅ **Input limits unchanged.** `validateOffer` runs first; masking runs after it and before Gemini.
+- ✅ **Examples are invented and labeled.** The demo offer and test offers are invented (`lib/fixtures/offers.ts`, "DATOS DE EJEMPLO"). B1 on `/contenido` and the METHOD walk-through carry "Ejemplo con datos de prueba".
+
+### Packet §4: success definition
+1. ✅ Share flow works on 🔴/🟡 (F1, F2; Rafael checked it in Safari).
+2. ✅ Green is never shareable.
+3. ✅ Source tags are counted (F4; Rafael saw `fb_group` saved).
+4. ✅ `shared` event kind (F2; Rafael saw the row in `check_events`).
+5. ✅ `/api/card` renders A1 and C1 as PNGs in the brand layout, now with Inter Bold. **Note:** the cards read `lib/patterns.ts`, the repo copy of `fraud_patterns`, not the live table (decision in F3).
+6. ✅ `/contenido` is live with the three series, three finished assets, three sketches, the promise line and the "Revisa una oferta" button tagged `?src=contenido`.
+7. ✅ Masking before the AI (F5); the 5 test offers keep their verdicts.
+8. ✅ The site description is the rewritten §3b line.
+9. ⏳ `docs/content/` holds CONCEPTS, METHOD and APPROVALS. **The sign-off lines depend on Rafael (M3).**
+10. ⏳ **Persona test (§14d) depends on Rafael (M5)**, to be recorded in `docs/PERSONA_TEST_WEEK15.md`.
+
+### Founder query (packet §11, run in the Supabase SQL editor)
+```sql
+select source, verdict, count(*) from public.checks
+ where created_at > now() - interval '7 days' and not example
+ group by source, verdict order by source;
+```
+For the §3f "verdicts shared" row:
+```sql
+select count(*) from public.check_events
+ where kind = 'shared' and created_at > now() - interval '7 days';
+```
