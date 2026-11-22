@@ -55,3 +55,16 @@ describe("card text", () => {
     expect(headlineSize("uno dos tres cuatro cinco seis siete ocho nueve diez")).toBeLessThan(72);
   });
 });
+
+describe("card fonts (Inter Bold, OFL)", () => {
+  it("the shared-card OG image stays under 150 KB with 3 long signals", async () => {
+    const { default: Image } = await import("@/app/s/[verdict]/[patterns]/opengraph-image");
+    const res = (await Image({
+      params: Promise.resolve({ verdict: "red", patterns: "personal_documents,impersonated_brand,generic_email" }),
+    })) as Response;
+    expect(res.status).toBe(200);
+    const buf = new Uint8Array(await res.arrayBuffer());
+    expect(pngSize(buf)).toEqual({ width: 1200, height: 630 });
+    expect(buf.byteLength).toBeLessThan(150 * 1024);
+  });
+});

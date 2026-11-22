@@ -1,10 +1,11 @@
 import { ImageResponse } from "next/og";
+import { cardFonts } from "@/lib/card-fonts";
 import { CARD_FOOTER, SERIES_A, SERIES_C, headlineSize, parseCardQuery } from "@/lib/cards";
 
 // GET /api/card?series=a&pattern=<id>  → 1080×1080 "SEÑAL DE LA SEMANA"
 // GET /api/card?series=c               → 1080×1920 "ANTES DE DEPOSITAR"
 // Same five slots as every Lupa card (PACKET §3b): band → headline → body →
-// source chip → footer. Built-in font only (no web fonts), no emoji.
+// source chip → footer. Inter from the repo, drawn into the PNG (no web fonts), no emoji.
 
 const NAVY = "#1B2A41";
 const AMBER = "#F2A900";
@@ -25,7 +26,16 @@ function Card({
   tall: boolean;
 }) {
   return (
-    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#FFFFFF" }}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        background: "#FFFFFF",
+        fontFamily: "Inter",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -105,11 +115,12 @@ export async function GET(request: Request) {
     return Response.json({ error: "series must be a (with a known pattern) or c" }, { status: 400 });
   }
 
+  const fonts = await cardFonts();
   if (card.series === "a") {
     const p = card.pattern;
     return new ImageResponse(
       <Card label={SERIES_A.label} headline={p.label_es} body={p.next_step_es} source={p.source} tall={false} />,
-      { ...SERIES_A.size, headers: { "Cache-Control": CACHE } },
+      { ...SERIES_A.size, fonts, headers: { "Cache-Control": CACHE } },
     );
   }
 
@@ -147,6 +158,6 @@ export async function GET(request: Request) {
         ))}
       />
     ),
-    { ...SERIES_C.size, headers: { "Cache-Control": CACHE } },
+    { ...SERIES_C.size, fonts, headers: { "Cache-Control": CACHE } },
   );
 }

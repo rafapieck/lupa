@@ -1,9 +1,10 @@
 import { ImageResponse } from "next/og";
+import { cardFonts } from "@/lib/card-fonts";
 import { OG_FOOTER, OG_LABEL, parseShare, shareSources } from "@/lib/share";
 
 // 1200×630 link preview for a shared card (PACKET §3b layout, §5 mockup):
 // navy band + amber label → verdict badge → up to 3 signals → sources → footer.
-// No web fonts (ImageResponse's built-in font) and no emoji (they'd be fetched).
+// Inter from the repo, drawn into the PNG (no web fonts), and no emoji (they'd be fetched).
 
 export const alt = "Aviso de Lupa con las señales de alerta encontradas";
 export const size = { width: 1200, height: 630 };
@@ -17,14 +18,24 @@ export default async function Image({ params }: { params: Promise<{ verdict: str
   const card = parseShare(verdict, patterns);
   if (!card) return new Response("Not found", { status: 404 });
 
+  const fonts = await cardFonts();
   const shown = card.patterns.slice(0, 3);
   const badge =
     card.verdict === "red" ? { bg: "#B91C1C", fg: "#FFFFFF" } : { bg: "#FCD34D", fg: NAVY };
-  const signalSize = shown.length === 1 ? 64 : shown.length === 2 ? 52 : 42;
+  const signalSize = shown.length === 1 ? 64 : shown.length === 2 ? 52 : 38;
 
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#FFFFFF" }}>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          background: "#FFFFFF",
+          fontFamily: "Inter",
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -110,6 +121,6 @@ export default async function Image({ params }: { params: Promise<{ verdict: str
         </div>
       </div>
     ),
-    { ...size, headers: { "Cache-Control": "public, max-age=86400, immutable" } },
+    { ...size, fonts, headers: { "Cache-Control": "public, max-age=86400, immutable" } },
   );
 }
