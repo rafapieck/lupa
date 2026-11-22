@@ -461,3 +461,9 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 - Local production build: `/s/red/upfront_payment,personal_documents` → 200, `scrollWidth` 390 at 390px (no horizontal scroll). `/s/green/…`, `/s/red/fake_id`, 7 ids and the green OG image → 404.
 - ✅ F1 criteria pass.
 - **Note:** `next build` printed a Next.js security notice. `npm audit` lists moderate advisories for next 16.0.0–16.4.4, fixed in 16.4.6. No upgrade was made; it waits for Rafael's OK.
+
+## 2026-11-22 — Next.js 16.4.3 → 16.4.6 (security)
+- Why: `next build` showed a security notice, and `npm audit` listed moderate advisories for next 16.0.0–16.4.4 (fixed in 16.4.6). Rafael approved the upgrade in its own commit, before F2.
+- Changed: `next` and `eslint-config-next` pinned to `16.4.6` (package.json + package-lock.json). No code changes.
+- Checks: `Test Files  25 passed (25) · Tests  221 passed (221)`; ESLint and `tsc` clean; `next build` passes with no security notice. A local production smoke test returned 200 for `/`, `/pricing`, the share card and its OG image, and 404 for `/s/green/…` and `/s/red/fake_id`. `npm audit` no longer lists `next`.
+- Not changed: `npm audit` still reports advisories in dev and test tooling (vitest, tinypool, minimatch, zod via the eslint chain). They don't ship to the site, and fixing some of them needs breaking upgrades. They're left for a separate decision.
