@@ -521,3 +521,45 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
   - The list lives in `lib/simulated-reason.ts`, so the Gemini SDK stays out of the browser bundle.
 - The Vercel log line (`Gemini extraction failed: …`) is unchanged.
 - **Checks:** `Test Files  27 passed (27) · Tests  249 passed (249)`; ESLint and `tsc` are clean; `next build` passes.
+
+### Known pending: Gemini API key (2026-11-22)
+- On 2026-11-22 the new note showed **"(motivo: auth)"**: the `GEMINI_API_KEY` in Vercel is no longer valid (expired or revoked).
+- **Effect:** every check runs on the keyword rules and is marked "análisis de IA simulado (motivo: auth)". Verdicts still come from the same scoring rules, so the site works.
+- **Owner:** Rafael. He'll create a new key in Google AI Studio and paste it himself into Vercel → lupa → Settings → Environment Variables (`GEMINI_API_KEY`, Production), then redeploy. No code change is needed.
+- **How to confirm:** after the new key, a check should show no gray note. If a note still shows, its motivo says why.
+
+## 2026-11-22 — Week 15 F3: series cards from patterns
+
+### What shipped
+- `GET /api/card?series=a&pattern=<id>` → a 1080×1080 PNG, "SEÑAL DE LA SEMANA". The headline is the pattern's `label_es`, the body its `next_step_es`, the chip "Fuente: <source>", and the footer "Pega la oferta en lupaempleo.xyz".
+- `GET /api/card?series=c` → a 1080×1920 PNG, "ANTES DE DEPOSITAR". The headline is "3 cosas antes de depositar", followed by the three C1 lines from packet §3c and the same chip and footer.
+- Any other `series`, a missing or unknown `pattern`, or uppercase `A` → 400 (JSON, no image).
+- `Cache-Control: public, max-age=86400`.
+
+### Decisions
+- **Text comes only from `lib/patterns.ts`** (`LOCAL_PATTERNS`) and the fixed lines in `lib/cards.ts`. It doesn't come from the database, so a card is stable and cacheable and can't show anything the repo doesn't hold.
+- **Source for card C:** line 1 is the `upfront_payment` signal, so C cites that pattern's source (Policía Cibernética CDMX).
+- **Headline size:** §3b asks for 72–84 px with a maximum of 8 words.
+  - Labels of up to 6 words get 84 px, and up to 8 words get 76 px.
+  - Longer labels (some have 9–12 words) step down to 64 px so they fit. I didn't trim any `label_es` text, because pattern content is off limits.
+  - On the vertical card C, the headline is 96 px and the lines are 56 px so the taller canvas doesn't look empty.
+- **Same 5 slots as every Lupa card** (§3b): navy band with an amber label → headline → body → gray "Fuente:" chip → footer under an amber rule.
+- **Built-in font only** (no web fonts), and no emoji.
+- `lib/cards.ts` was added to the copy-audit file list.
+
+### Gap found: no bold
+- `ImageResponse`'s built-in font (Geist) ships only the **Regular** weight. So the headline, the label and the footer render regular, not bold as §3b asks. The F1 OG image has the same issue.
+- **Fix, if Rafael approves:** commit `Geist-Bold.ttf` (SIL Open Font License, roughly 70 KB) and load it only on the server when drawing cards.
+  - The PNGs would stay under 150 KB, and phones would download no font.
+  - It isn't an npm dependency, but it is a new file in the repo, so it waits for his OK.
+
+### Checks
+- `app/api/card/route.test.ts`:
+  - Every pattern in series A returns a 200 PNG of 1080×1080 under 150 KB with the 1-day cache header.
+  - Series C returns a 1080×1920 PNG under 150 KB.
+  - Six bad queries return 400.
+  - The text comes from the pattern, and C cites the `upfront_payment` source.
+  - Headline sizes follow §3b.
+- Real sizes from a local production server: A1 (`upfront_payment`) 88 KB, A with the longest label (`generic_email`) 88 KB, C1 about 120 KB.
+- Suite: `Test Files  28 passed (28) · Tests  272 passed (272)`. ESLint and `tsc` are clean, and `next build` passes.
+- ✅ F3 criteria pass, except the bold weight (gap above).
