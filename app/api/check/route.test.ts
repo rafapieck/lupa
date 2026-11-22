@@ -88,6 +88,17 @@ describe("POST /api/check (Gemini key set but the call fails)", () => {
     const json = await res.json();
     expect(json.simulated).toBe(true);
     expect(json.verdict).toBe("red");
+    expect(json.simulatedReason).toBe("timeout");
+  });
+
+  it("returns only the error category, never the key or the error message", async () => {
+    generateContent.mockRejectedValue(
+      Object.assign(new Error("Quota exceeded for key test-key-SECRET123 on project 42"), { status: 429 }),
+    );
+    const res = await post({ text: OFFER_1 });
+    const raw = await res.text();
+    expect(JSON.parse(raw).simulatedReason).toBe("quota");
+    expect(raw).not.toMatch(/SECRET123|test-key|Quota exceeded|project 42/);
   });
 
   it("exports maxDuration = 30 so Vercel does not cut Gemini off first", async () => {

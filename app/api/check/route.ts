@@ -36,10 +36,14 @@ export async function POST(request: Request) {
     return Response.json({ error: validation.error }, { status: 400 });
   }
 
-  const [{ signals, simulated }, { patterns }] = await Promise.all([
+  const [extraction, { patterns }] = await Promise.all([
     extractSignals(validation.text),
     loadPatterns(),
   ]);
+  const { signals, simulated } = extraction;
+  // Only the fixed category (quota, timeout…) is returned, so Rafael can see
+  // why from his phone. Never the key or the error text, and it isn't saved.
+  const simulatedReason = extraction.simulated ? extraction.reason : undefined;
   const result = scoreSignals(signals, patterns);
 
   // Never throws; a failed save still returns the verdict (checkId: null, so
@@ -50,7 +54,7 @@ export async function POST(request: Request) {
   const checkId = await saveCheck(result, simulated, input?.repeatVisit === true, example);
 
   return Response.json(
-    { ...result, simulated, checkId },
+    { ...result, simulated, ...(simulatedReason ? { simulatedReason } : {}), checkId },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

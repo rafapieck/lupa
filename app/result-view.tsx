@@ -1,3 +1,4 @@
+import { SIMULATED_REASONS, type SimulatedReason } from "@/lib/simulated-reason";
 import type { ScoreResult, Verdict } from "@/lib/score";
 import CopyReply from "./copy-reply";
 import IntentCard from "./intent-card";
@@ -6,7 +7,18 @@ import { shareLinkFor } from "@/lib/share";
 import VerifySteps from "./verify-steps";
 
 // checkId is null when the check could not be saved: then no events are sent.
-export type CheckResult = ScoreResult & { simulated: boolean; checkId?: string | null };
+export type CheckResult = ScoreResult & {
+  simulated: boolean;
+  checkId?: string | null;
+  simulatedReason?: SimulatedReason;
+};
+
+/** "(motivo: quota)" for a known category; anything else shows nothing. */
+export function reasonLabel(reason: unknown): string {
+  return typeof reason === "string" && (SIMULATED_REASONS as readonly string[]).includes(reason)
+    ? ` (motivo: ${reason})`
+    : "";
+}
 
 const THEME: Record<Verdict, { band: string; circle: string; icon: string; title: string }> = {
   red: { band: "bg-red-500", circle: "bg-red-700", icon: "text-red-700", title: "text-red-800" },
@@ -99,6 +111,7 @@ export default function ResultView({
           // not read as "fake result" (persona test, confusion #1).
           <p role="status" className="px-1 text-sm leading-snug text-gray-500">
             {SIMULATED_NOTE}
+            {reasonLabel(result.simulatedReason)}
           </p>
         )}
 
