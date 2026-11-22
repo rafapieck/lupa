@@ -1,5 +1,6 @@
 import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { SIGNALS } from "./patterns";
+import type { SimulatedReason } from "./simulated-reason";
 import { GUARDED_SIGNALS, keywordSignals } from "./keywords";
 import type { Signals } from "./score";
 
@@ -67,7 +68,29 @@ export function mergeWithGuard(ai: Signals, keywords: Signals): Signals {
   return out;
 }
 
-export type Extraction = { signals: Signals; simulated: boolean };
+
+export type Extraction =
+  | { signals: Signals; simulated: false }
+  | { signals: Signals; simulated: true; reason: SimulatedReason };
+
+/** Maps a Gemini SDK error to a category, from its status code and message. */
+export function classifyGeminiError(err: unknown): SimulatedReason {
+  const e = (err ?? {}) as { name?: string; message?: string; status?: number };
+  const name = String(e.name ?? "");
+  const msg = String(e.message ?? err ?? "");
+  const status = typeof e.status === "number" ? e.status : undefined;
+
+  if (name === "AbortError" || name === "TimeoutError" || status === 504 || /timed? ?out|deadline|aborted/i.test(msg)) {
+    return "timeout";
+  }
+  if (status === 429 || /quota|RESOURCE_EXHAUSTED|rate.?limit/i.test(msg)) return "quota";
+  if (status === 401 || status === 403 || /API.?key|PERMISSION_DENIED|UNAUTHENTICATED|permission/i.test(msg)) {
+    return "auth";
+  }
+  if (status === 404 || /NOT_FOUND|not found|no longer available/i.test(msg)) return "not_found";
+  if (status === 503 || /overloaded|UNAVAILABLE|high demand/i.test(msg)) return "overloaded";
+  return "other";
+}
 
 export async function extractSignalsWithGemini(
   text: string,
@@ -118,7 +141,7 @@ export async function extractSignals(
 ): Promise<Extraction> {
   const keywords = keywordSignals(text);
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return { signals: keywords, simulated: true };
+  if (!apiKey) return { signals: keywords, simulated: true, reason: "missing_key" };
   try {
     const ai = await extractSignalsWithGemini(text, apiKey, options.timeoutMs);
     return { signals: mergeWithGuard(ai, keywords), simulated: false };
@@ -128,6 +151,6 @@ export async function extractSignals(
     console.warn(
       `Gemini extraction failed: ${e.name ?? "Error"}${e.status ? ` (status ${e.status})` : ""}: ${String(e.message ?? err).slice(0, 300)}; using simulated extraction`,
     );
-    return { signals: keywords, simulated: true };
+    return { signals: keywords, simulated: true, reason: classifyGeminiError(err) };
   }
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { scoreSignals } from "@/lib/score";
 import CheckForm from "./check-form";
 import SiteFooter, { FOOTER_NOTE } from "./site-footer";
-import ResultView, { SIMULATED_NOTE, type CheckResult } from "./result-view";
+import ResultView, { SIMULATED_NOTE, reasonLabel, type CheckResult } from "./result-view";
 
 const red = scoreSignals({ asks_for_payment: true, unrealistic_pay: true, immediate_hiring: true });
 
@@ -27,6 +27,20 @@ describe("result screen — simulated note (persona test, confusion #1)", () => 
     expect(note).toBeGreaterThan(html.indexOf("Riesgo alto"));
     expect(note).toBeGreaterThan(html.indexOf(red.nextStep));
     expect(note).toBeLessThan(html.indexOf("Revisar otra oferta"));
+  });
+
+  it("shows the reason category in parentheses, e.g. (motivo: quota)", () => {
+    const html = renderToStaticMarkup(
+      <ResultView result={{ ...red, simulated: true, simulatedReason: "quota" }} isExample={false} onReset={() => {}} />,
+    );
+    expect(html).toContain("funcionan igual. (motivo: quota)");
+  });
+
+  it("never echoes an unknown reason", () => {
+    expect(reasonLabel("quota")).toBe(" (motivo: quota)");
+    expect(reasonLabel("<script>")).toBe("");
+    expect(reasonLabel(undefined)).toBe("");
+    expect(renderResult(true)).not.toContain("motivo");
   });
 
   it("uses the new wording, not the old 'Resultado simulado' banner", () => {

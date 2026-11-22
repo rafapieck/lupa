@@ -498,3 +498,26 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
   - `POST /api/event {kind:"shared"}` → 200; with an answer → 400.
 - M1 (Rafael, 2026-11-21): the §11 SQL ran with "Success. No rows returned", so `shared` events save in production.
 - ✅ F2 criteria pass.
+
+## 2026-11-22 — Show why the AI reading was simulated
+- **Why:** in production 3 of 3 checks today came back "análisis de IA simulado". Rafael can't open the Vercel logs from his phone, so he asked to see the cause on the result itself.
+- **What:** `classifyGeminiError()` in `lib/extract.ts` maps the failure to a fixed category, using the SDK error's status code and message:
+
+  | Category | When |
+  |---|---|
+  | `timeout` | `AbortError` or `TimeoutError`, 504, or "timed out" |
+  | `quota` | 429, "quota", `RESOURCE_EXHAUSTED` or "rate limit" |
+  | `auth` | 401, 403, "API key…" or `PERMISSION_DENIED` |
+  | `not_found` | 404, `NOT_FOUND` or "no longer available" |
+  | `overloaded` | 503, "overloaded", `UNAVAILABLE` or "high demand" |
+  | `missing_key` | no `GEMINI_API_KEY` |
+  | `other` | anything else |
+
+- `/api/check` adds `simulatedReason` to the JSON only when the reading is simulated. The gray note then ends with "(motivo: quota)".
+- **Safety:**
+  - Only the category leaves the server, never the key or the error text. A test sends an error message that contains a fake key and checks that none of it reaches the response.
+  - The browser shows the category only if it's on the fixed list.
+  - The category isn't saved in `checks` (no new data).
+  - The list lives in `lib/simulated-reason.ts`, so the Gemini SDK stays out of the browser bundle.
+- The Vercel log line (`Gemini extraction failed: …`) is unchanged.
+- **Checks:** `Test Files  27 passed (27) · Tests  249 passed (249)`; ESLint and `tsc` are clean; `next build` passes.
