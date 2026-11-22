@@ -98,7 +98,7 @@ Three finished assets (A1, B1, C1) across three formats. A2, B2 and C2 stay as p
 
 ### 3d. The method: one real input → useful output
 
-**Input:** a real job offer from a public Facebook job group, copied by Rafael with the recruiter’s phone, names and links removed before pasting. **[TO FILL: date and group type, never the group’s name or the poster.]** If no public post fits during the week, the fallback input is the offer pattern described in the public Policía Cibernética CDMX alert of May 2026 (“Te pagamos 2,800 al día”), clearly labeled *“reconstruido a partir de una alerta pública”*.
+**Input:** a real job offer from a public Facebook job group, copied by Rafael with the recruiter’s phone, names and links removed before pasting. **[TO FILL: date and group type, never the group’s name or the poster.]** If no real public offer fits, the fallback input is an invented test offer, clearly labeled *“Ejemplo con datos de prueba”*.
 
 **Method (6 roles, separate chats, human approval at the end):**
 
