@@ -124,16 +124,16 @@ For B1 the “visual production” role is the product itself: paste the offer �
 
 ### 3f. Honest results (filled after the test)
 
-| | Expected [ASSUMED] | What actually happened [TO FILL] |
+| | Expected [ASSUMED] | What actually happened (Rafael, 2026-11-22) |
 |---|---|---|
-| Admin permission | 1 of 3 admins says yes | |
-| Post reach (what Facebook shows) | 300–800 views | |
-| Checks with `src` tag in 72 h | 5–15 | |
-| Of those, 🔴 or 🟡 | ≥ 50% | |
-| Verdicts shared | 1–3 | |
-| Comments asking “¿esta es real?” | 1–2 | |
-| **Keep** | | |
-| **Change** | | |
+| Admin permission | 1 of 3 admins says yes | **No admin said yes.** Rafael asked admins of Facebook job groups; none accepted. |
+| Post reach (what Facebook shows) | 300–800 views | **No Facebook post** (no permission). Fallback: posted to Rafael’s WhatsApp status; nobody replied. Views were not reported. |
+| Checks with `src` tag in 72 h | 5–15 | **0** with `source = wa_status` (no `fb_group` post was made). |
+| Of those, 🔴 or 🟡 | ≥ 50% | Not applicable: 0 checks. |
+| Verdicts shared | 1–3 | Not reported. Comes from the `check_events` query in DECISIONS.md (F7); no number is entered until it’s run. |
+| Comments asking “¿esta es real?” | 1–2 | **0.** Nobody replied to the WhatsApp status. |
+| **Keep** | | Counting by source tag: it gave a real zero instead of a guess. |
+| **Change** | | Don’t depend on group admins or Rafael’s personal network. Test with an institutional ally (a job board or an NGO) that job seekers already trust. |
 
 Zero is a valid result and gets reported as zero. No personal data, screenshots with names, or profile pictures go into this table, the repo or the demo.
 

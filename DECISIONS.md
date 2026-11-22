@@ -801,3 +801,13 @@ All 350 tests pass.
 - Also pending: renew `GEMINI_API_KEY`.
 
 **Tomorrow's first move:** Rafael renews `GEMINI_API_KEY` in Vercel → lupa → Settings → Environment Variables (Production), redeploys, and checks one offer: the gray "simulado" note should be gone. Then he starts M3 on A1.
+
+## 2026-11-22 — Distribution test results (M4): zero is the real result
+Rafael reported the results; packet §3f is filled with them as given. No number was invented.
+- **Facebook:** Rafael asked admins of Facebook job groups for permission. None accepted, so nothing was posted to Facebook.
+- **Fallback (WhatsApp status):** Rafael posted to his own WhatsApp status. Nobody replied, and nobody used Lupa from it: **0 checks with `source = wa_status`.**
+- **Zero is the real result** and is recorded as zero (packet §3f, §12.4).
+- **Not reported, left blank:** the "Verdicts shared" count stays unfilled until the `check_events` query (F7 entry above) is run, and status views were not given.
+- **Keep:** counting by source tag. It produced a real zero instead of a guess.
+- **Change (Rafael):** don't depend on group admins or a personal network. Test with an institutional ally (a job board or an NGO) that job seekers already trust.
+- §4 item 10 (persona test, M5) and M3 (approvals) are still pending.
