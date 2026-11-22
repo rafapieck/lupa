@@ -563,3 +563,25 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 - Real sizes from a local production server: A1 (`upfront_payment`) 88 KB, A with the longest label (`generic_email`) 88 KB, C1 about 120 KB.
 - Suite: `Test Files  28 passed (28) · Tests  272 passed (272)`. ESLint and `tsc` are clean, and `next build` passes.
 - ✅ F3 criteria pass, except the bold weight (gap above).
+
+## 2026-11-22 — Bold text on the cards (Inter, OFL)
+- **Why:** the font built into `ImageResponse` only had Regular, so the cards' label, headline and footer weren't bold as §3b asks. Rafael approved a free-licensed font stored in the repo.
+- **What:**
+  - `assets/fonts/Inter-Regular.woff` and `Inter-Bold.woff`: Inter, latin subset (covers á é í ó ú ñ ¿ ·), about 31 KB each, taken from the `@fontsource/inter` 5.1.0 package. It wasn't installed: no new dependency.
+  - The license is copied to `assets/fonts/OFL.txt` (SIL Open Font License 1.1).
+  - `lib/card-fonts.ts` reads both files once per server instance.
+  - `next.config.ts` adds `outputFileTracingIncludes` so Vercel bundles the fonts with `/api/card` and the share card's `opengraph-image`. The build's `.nft.json` traces list them.
+- **Both weights:** Regular as well as Bold, so the body text and the "Fuente:" chip share one typeface with the headlines instead of mixing Inter and Geist.
+- **Phones download no font.** The text is drawn into the PNG on the server, and `assets/` isn't public.
+- **Sizes after the change** (local production server):
+
+  | Card | Size |
+  |---|---|
+  | A1 | 87 KB |
+  | A, longest label | 88 KB |
+  | C1 | 123 KB |
+  | F1 OG, 2 signals | 68 KB |
+  | F1 OG, 3 long signals | 84 KB |
+
+  All are under 150 KB. A new test renders the 3-long-signal OG image and checks that it's 1200×630 and under 150 KB.
+- With Inter Bold, three long signals filled the OG image to its edges, so the 3-signal text size went from 42 to 38 px.
