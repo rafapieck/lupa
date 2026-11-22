@@ -15,8 +15,9 @@ afterEach(() => getChecksThisWeek.mockReset());
 describe("site header", () => {
   it("links to the checker, Cómo funciona, Precios and Nosotros", () => {
     const html = renderToStaticMarkup(<SiteHeader />);
-    for (const text of ["Lupa", "Revisar oferta", "Cómo funciona", "Precios", "Nosotros"]) expect(html).toContain(text);
+    for (const text of ["Lupa", "Revisar oferta", "Cómo funciona", "Contenido", "Precios", "Nosotros"]) expect(html).toContain(text);
     expect(html).toContain('href="/pricing"');
+    expect(html).toContain('href="/contenido"');
     expect(html).toContain('href="/product"');
     expect(html).toContain('href="/about"');
   });

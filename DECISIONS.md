@@ -649,3 +649,39 @@ Offers pasted from WhatsApp often include the recruiter's number, the seeker's o
 - Suite: `Test Files  30 passed (30) · Tests  339 passed (339)`. ESLint and `tsc` are clean, and `next build` passes.
 - ✅ F5 criteria pass.
 - **Note:** production still answers "simulated (motivo: auth)" until Rafael renews `GEMINI_API_KEY`. Masking only affects the Gemini path, so it takes effect as soon as the key works.
+
+## 2026-11-22 — Week 15 F6: launch content page (deploy #2)
+
+### What shipped
+- **`/contenido`**:
+  - The title "Contenido de Lupa", then the promise line: "Lupa no te dice si una oferta es real. Te dice qué señales de alerta encontró y de dónde viene cada una."
+  - Three series cards, each with its purpose, format, finished asset and sketch as text:
+    - A1 = `/api/card?series=a&pattern=upfront_payment`
+    - B1 = the OG image of `/s/red/upfront_payment,personal_documents`, labeled "Ejemplo con datos de prueba"
+    - C1 = `/api/card?series=c`
+    - Sketches A2, B2 and C2 follow packet §3c.
+  - Then the "Revisa una oferta" button → `/?src=contenido`.
+- The header has a new **"Contenido"** link (between "Cómo funciona" and "Precios").
+- The site description is now the §3b line: "¿Te piden dinero antes de contratarte? Pega la oferta y ve qué señales de fraude tiene y de qué alerta oficial viene cada una."
+
+### Decisions
+- **The promise line vs. the copy audit.** The repo's copy audit also bans "es real" (stricter than hard rule 2), and the line the prompt asks for contains it in its negated form. I allowed exactly that sentence (`PROMISE_LINE`): the audit removes that one sentence before scanning, and any other "es real" still fails. A test pins the sentence to its negated start, "Lupa no te dice si una oferta es real.". The packet's original wording ("…es real o segura") isn't used, so "segura" never appears.
+- **Sketches come from the data, too.**
+  - A2 uses the `personal_documents` label and source.
+  - B2 lists what Lupa's own keyword rules find in the invented Mundial test offer (`OFFER_3`).
+  - C2 quotes the existing `upfront_payment` reply (`reply_es`).
+  - No new claims are written.
+- **Images:** `next/image` with `unoptimized` (they're already small PNGs, cached for a day), real `width` and `height` (no layout jump), descriptive `alt` text, and `loading="lazy"`. On a fast connection Chromium loaded all three right away, because its lazy-load distance covers this page; on slower networks it waits as usual.
+
+### Copy audit (PACKET §14e)
+`app/copy-audit.test.tsx` now also checks:
+- the rendered HTML of `/contenido` and of three `/s/...` cards;
+- every card and OG text (series labels, C1 lines, footers, and all pattern labels, next steps and sources);
+- the WhatsApp message and the share buttons.
+
+The source scan still covers all of `app/`, plus `lib/share.ts` and `lib/cards.ts`.
+
+### Checks
+- Suite: `Test Files  30 passed (30) · Tests  348 passed (348)`. ESLint and `tsc` are clean, and `next build` passes (`/contenido` is static).
+- On a local production server at 390px: `scrollWidth` 390 (no horizontal scroll), all three images load with status 200, the header wraps onto two lines cleanly, and the home page's `<meta name="description">` is the new line.
+- ✅ F6 criteria pass.
