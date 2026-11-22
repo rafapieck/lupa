@@ -51,10 +51,30 @@ describe("POST /api/check saves an anonymous check", () => {
       simulated: true,
       repeat_visit: false,
       example: true, // OFFER_1 is the "Probar con un ejemplo" offer
+      source: null,
     });
     expect(json.checkId).toMatch(/^[0-9a-f-]{36}$/);
     expect(row).not.toHaveProperty("text");
     expect(JSON.stringify(row)).not.toContain("uniforme");
+  });
+
+  it.each([
+    ["fb_group", "fb_group"],
+    ["wa_status", "wa_status"],
+    ["wa_share", "wa_share"],
+    ["contenido", "contenido"],
+    ["direct", "direct"],
+    ["<script>", null],
+    ["tiktok", null],
+    ["FB_GROUP", null],
+    [42, null],
+    [null, null],
+  ])("source %j is saved as %j (PACKET §14c) and the check still works", async (source, saved) => {
+    insert.mockReturnValue({ abortSignal: () => Promise.resolve({ error: null }) });
+    const res = await post(OFFER_2, { source });
+    expect(res.status).toBe(200);
+    expect((await res.json()).verdict).toBeTruthy();
+    expect(insert.mock.calls[0][0].source).toBe(saved);
   });
 
   it("flags only the built-in example offer as a demo check (Week 13 bug)", async () => {

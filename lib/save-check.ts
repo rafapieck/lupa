@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { ScoreResult } from "./score";
+import { toSource, type Source } from "./source";
 
 const SAVE_TIMEOUT_MS = 3000;
 
@@ -17,6 +18,8 @@ export type CheckRow = {
   simulated: boolean;
   repeat_visit: boolean;
   example: boolean;
+  /** Week 15: where the visit came from, from a fixed list, or null. */
+  source: Source | null;
 };
 
 export function toCheckRow(
@@ -25,6 +28,7 @@ export function toCheckRow(
   repeatVisit: unknown = false,
   id: string = crypto.randomUUID(),
   example: unknown = false,
+  source: unknown = null,
 ): CheckRow {
   return {
     id,
@@ -34,6 +38,7 @@ export function toCheckRow(
     simulated,
     repeat_visit: repeatVisit === true,
     example: example === true,
+    source: toSource(source),
   };
 }
 
@@ -48,13 +53,14 @@ export async function saveCheck(
   simulated: boolean,
   repeatVisit: unknown = false,
   example: unknown = false,
+  source: unknown = null,
 ): Promise<string | null> {
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !key) return null;
 
-    const row = toCheckRow(result, simulated, repeatVisit, undefined, example);
+    const row = toCheckRow(result, simulated, repeatVisit, undefined, example, source);
     const supabase = createClient(url, key, { auth: { persistSession: false } });
     const { error } = await supabase
       .from("checks")

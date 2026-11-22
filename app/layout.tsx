@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SiteFooter from "./site-footer";
 import SiteHeader from "./site-header";
+import SourceCapture from "./source-capture";
 
 export const metadata: Metadata = {
   title: "Lupa 🔍 — Revisa si una oferta de trabajo tiene señales de fraude",
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es-MX" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <SourceCapture />
         <SiteHeader />
         {children}
         <SiteFooter />

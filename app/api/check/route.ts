@@ -12,7 +12,7 @@ export const maxDuration = 30;
 const MAX_BODY_BYTES = 20_000;
 
 /**
- * POST /api/check  { text: string, repeatVisit?: boolean }
+ * POST /api/check  { text: string, repeatVisit?: boolean, source?: string }
  * Nothing the user pastes is stored or logged. Only the verdict, score,
  * matched pattern IDs, the simulated flag and a repeat-visit yes/no are saved
  * (lib/save-check.ts).
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Pega el texto completo de la oferta" }, { status: 400 });
   }
 
-  const input = body as { text?: unknown; repeatVisit?: unknown } | null;
+  const input = body as { text?: unknown; repeatVisit?: unknown; source?: unknown } | null;
   const validation = validateOffer(input?.text);
   if (!validation.ok) {
     return Response.json({ error: validation.error }, { status: 400 });
@@ -51,7 +51,9 @@ export async function POST(request: Request) {
   // Demo checks (the "Probar con un ejemplo" offer) are saved flagged, so they
   // never count as real users. The text match covers anyone who pastes it.
   const example = validation.text === EXAMPLE_OFFER;
-  const checkId = await saveCheck(result, simulated, input?.repeatVisit === true, example);
+  // source is re-validated against the fixed list inside toCheckRow: anything
+  // else is saved as null and the check still works.
+  const checkId = await saveCheck(result, simulated, input?.repeatVisit === true, example, input?.source);
 
   return Response.json(
     { ...result, simulated, ...(simulatedReason ? { simulatedReason } : {}), checkId },
