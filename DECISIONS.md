@@ -811,3 +811,18 @@ Rafael reported the results; packet §3f is filled with them as given. No number
 - **Keep:** counting by source tag. It produced a real zero instead of a guess.
 - **Change (Rafael):** don't depend on group admins or a personal network. Test with an institutional ally (a job board or an NGO) that job seekers already trust.
 - §4 item 10 (persona test, M5) and M3 (approvals) are still pending.
+
+## 2026-11-22 — Persona test Week 15 (M5, Jorge, SIMULACIÓN): worst confusion fixed
+- **Worst confusion** (reproduces live): the gray note "La IA no respondió esta vez (análisis de IA simulado)… (motivo: auth)". Jorge read "simulado" as "falso", saw it clash with "Lo analiza una IA de Google", and found "auth" to be jargon. He doubted "Riesgo alto" and paid.
+- **Fix (Rafael's wording):**
+  - The note now reads "Esta vez la revisión se hizo sin IA, solo con nuestras señales de alerta oficiales. El resultado siempre lo deciden estas señales."
+  - The reason is off the screen. It stays in the `/api/check` JSON and in a `data-simulated-reason` attribute, with values from the fixed list only.
+  - `checks.simulated` is unchanged, and the label stays honest: the screen still says no AI was used this time.
+- **Supersedes:** the on-screen "(motivo: …)" from earlier today (967f56b). To diagnose from a phone now, read the JSON from `/api/check`, or ask the agent.
+- **Tests:** the copy audit and `screens.test.tsx` check the new wording, and that the visible text has no "simulad", "motivo" or error codes.
+- **Record:** `docs/PERSONA_TEST_WEEK15.md`, marked SIMULACIÓN. Jorge's table didn't arrive with Rafael's message, so it's a marked placeholder until he pastes it. The retest is pending (Rafael, live site).
+- **Other confusions, logged as pending (not built):**
+  1. "Precios" in the top menu, on a site for job seekers.
+  2. The `.xyz` domain looks untrustworthy.
+  3. "Mandar aviso" can read as "reportar" (to the police or a platform).
+  4. What to do if you already paid.

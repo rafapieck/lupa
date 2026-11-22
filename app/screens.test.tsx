@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { scoreSignals } from "@/lib/score";
 import CheckForm from "./check-form";
 import SiteFooter, { FOOTER_NOTE } from "./site-footer";
-import ResultView, { SIMULATED_NOTE, reasonLabel, type CheckResult } from "./result-view";
+import ResultView, { SIMULATED_NOTE, reasonAttr, type CheckResult } from "./result-view";
 
 const red = scoreSignals({ asks_for_payment: true, unrealistic_pay: true, immediate_hiring: true });
 
@@ -29,25 +29,33 @@ describe("result screen — simulated note (persona test, confusion #1)", () => 
     expect(note).toBeLessThan(html.indexOf("Revisar otra oferta"));
   });
 
-  it("shows the reason category in parentheses, e.g. (motivo: quota)", () => {
+  it("keeps the reason off the screen, only in a data- attribute for diagnosis", () => {
     const html = renderToStaticMarkup(
-      <ResultView result={{ ...red, simulated: true, simulatedReason: "quota" }} isExample={false} onReset={() => {}} />,
+      <ResultView result={{ ...red, simulated: true, simulatedReason: "auth" }} isExample={false} onReset={() => {}} />,
     );
-    expect(html).toContain("funcionan igual. (motivo: quota)");
+    expect(html).toContain('data-simulated-reason="auth"');
+    // Visible text: strip tags and attributes.
+    const visible = html.replace(/<[^>]*>/g, " ");
+    expect(visible).not.toMatch(/motivo|auth/);
   });
 
-  it("never echoes an unknown reason", () => {
-    expect(reasonLabel("quota")).toBe(" (motivo: quota)");
-    expect(reasonLabel("<script>")).toBe("");
-    expect(reasonLabel(undefined)).toBe("");
-    expect(renderResult(true)).not.toContain("motivo");
+  it("never echoes an unknown reason, even in the attribute", () => {
+    expect(reasonAttr("quota")).toBe("quota");
+    expect(reasonAttr("<script>")).toBeNull();
+    expect(reasonAttr(undefined)).toBeNull();
+    const html = renderToStaticMarkup(
+      <ResultView result={{ ...red, simulated: true, simulatedReason: "x" as never }} isExample={false} onReset={() => {}} />,
+    );
+    expect(html).not.toContain("data-simulated-reason");
   });
 
-  it("uses the new wording, not the old 'Resultado simulado' banner", () => {
+  it("says plainly that no AI was used this time, without 'simulado' (persona test Week 15, Jorge)", () => {
     expect(SIMULATED_NOTE).toBe(
-      "ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual.",
+      "Esta vez la revisión se hizo sin IA, solo con nuestras señales de alerta oficiales. El resultado siempre lo deciden estas señales.",
     );
-    expect(renderResult(true)).not.toContain("Resultado simulado");
+    const visible = renderResult(true).replace(/<[^>]*>/g, " ");
+    expect(visible).toContain("sin IA");
+    expect(visible).not.toMatch(/simulad|Resultado simulado|falso/i);
   });
 });
 
