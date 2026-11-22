@@ -3,7 +3,7 @@ import { saveEvent, validateEvent } from "@/lib/save-event";
 const MAX_BODY_BYTES = 1_000;
 
 /**
- * POST /api/event  { checkId: uuid, kind: "reply_copied" | "intent", answer?: ... }
+ * POST /api/event  { checkId: uuid, kind: "reply_copied" | "intent" | "shared", answer?: ... }
  * Anonymous: only the check id, the kind and a fixed answer are saved.
  * A failed save still answers 200 so the UI never breaks.
  */

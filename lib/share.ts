@@ -1,5 +1,5 @@
 import { LOCAL_PATTERNS, type FraudPattern } from "./patterns";
-import { VERDICT_LABELS, verdictFor, type Verdict } from "./score";
+import { VERDICT_LABELS, verdictFor, type ScoreResult, type Verdict } from "./score";
 
 // Shared verdict cards (/s/[verdict]/[patterns], PACKET §4.1, §12.1–2, §13).
 // A card is rebuilt only from pattern ids in lib/patterns.ts, so it can't say
@@ -80,3 +80,31 @@ export const SHARE_CTA_HREF = "/?src=wa_share";
 export const SHARE_NOTE = "Este aviso solo muestra señales de alerta. No incluye la oferta original.";
 export const OG_LABEL = "LA REVISÉ CON LUPA";
 export const OG_FOOTER = "Revisa la tuya en lupaempleo.xyz";
+
+// WhatsApp share (F2, PACKET §4.1). The message is fixed text plus the /s/ link:
+// nothing from the offer itself.
+export const SITE_URL = "https://www.lupaempleo.xyz";
+export const WA_BUTTON = "Mandar aviso por WhatsApp";
+export const WA_NOTE = "No mandamos el texto de la oferta, solo las señales.";
+export const WA_MESSAGE_PREFIX =
+  "Revisé una oferta de trabajo en Lupa y tiene señales de fraude. Mira cuáles antes de pagar: ";
+
+/**
+ * The /s/ path for a result, or null when it can't be shared: green, no
+ * matches, or a match that the card page wouldn't accept (so we never send a
+ * link that opens a 404).
+ */
+export function shareLinkFor(result: Pick<ScoreResult, "verdict" | "matches">): string | null {
+  if (result.verdict === "green" || result.matches.length === 0) return null;
+  const path = sharePath(result.verdict, result.matches.map((m) => m.id));
+  const [, , verdict, patterns] = path.split("/");
+  return parseShare(verdict, patterns) ? path : null;
+}
+
+export function whatsappMessage(path: string): string {
+  return `${WA_MESSAGE_PREFIX}${SITE_URL}${path}`;
+}
+
+export function whatsappUrl(path: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(whatsappMessage(path))}`;
+}

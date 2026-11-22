@@ -6,7 +6,7 @@ const SAVE_TIMEOUT_MS = 3000;
 export const INTENT_ANSWERS = ["no_pay", "verify", "continue", "already_paid"] as const;
 export type IntentAnswer = (typeof INTENT_ANSWERS)[number];
 
-export const EVENT_KINDS = ["reply_copied", "intent"] as const;
+export const EVENT_KINDS = ["reply_copied", "intent", "shared"] as const;
 export type EventKind = (typeof EVENT_KINDS)[number];
 
 /** The only shape ever written to `check_events`. */
@@ -34,7 +34,8 @@ export function validateEvent(input: unknown): EventValidation {
   }
 
   if (answer !== undefined && answer !== null) return { ok: false, error: "unexpected answer" };
-  return { ok: true, row: { check_id: checkId.toLowerCase(), kind: "reply_copied", answer: null } };
+  // reply_copied and shared (Week 15) never carry an answer.
+  return { ok: true, row: { check_id: checkId.toLowerCase(), kind: kind as Exclude<EventKind, "intent">, answer: null } };
 }
 
 /** Saves one event. Never throws; logs only "event save failed". */

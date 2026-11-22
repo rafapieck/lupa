@@ -35,8 +35,16 @@ describe("validateEvent", () => {
     });
   });
 
+  it("accepts shared with no answer (Week 15 F2)", () => {
+    expect(validateEvent({ checkId: ID, kind: "shared" })).toEqual({
+      ok: true,
+      row: { check_id: ID, kind: "shared", answer: null },
+    });
+  });
+
   it.each([
     ["not an object", "hola"],
+    ["shared with an answer", { checkId: ID, kind: "shared", answer: "no_pay" }],
     ["missing checkId", { kind: "intent", answer: "no_pay" }],
     ["checkId not a uuid", { checkId: "123", kind: "intent", answer: "no_pay" }],
     ["unknown kind", { checkId: ID, kind: "visit" }],

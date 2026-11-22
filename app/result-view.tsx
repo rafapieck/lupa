@@ -1,6 +1,8 @@
 import type { ScoreResult, Verdict } from "@/lib/score";
 import CopyReply from "./copy-reply";
 import IntentCard from "./intent-card";
+import ShareWhatsApp from "./share-whatsapp";
+import { shareLinkFor } from "@/lib/share";
 import VerifySteps from "./verify-steps";
 
 // checkId is null when the check could not be saved: then no events are sent.
@@ -32,6 +34,8 @@ export default function ResultView({
   onReset: () => void;
 }) {
   const theme = THEME[result.verdict];
+  // Never on green (shareLinkFor returns null) and never on the example offer.
+  const sharePath = isExample ? null : shareLinkFor(result);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -78,6 +82,9 @@ export default function ResultView({
           <h3 className="text-lg font-semibold text-gray-900">Qué hacer ahora</h3>
           <p className="mt-1 text-xl leading-snug font-bold text-gray-900">{result.nextStep}</p>
         </section>
+
+        {/* Week 15 F2: send the warning, not the offer, back into WhatsApp. */}
+        {sharePath && <ShareWhatsApp path={sharePath} checkId={result.checkId} />}
 
         {/* Week 13 real users #1 and #3 didn't know how to check the company. */}
         {result.verdict !== "green" && <VerifySteps />}
