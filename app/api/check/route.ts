@@ -1,5 +1,6 @@
 import { extractSignals } from "@/lib/extract";
 import { loadPatterns } from "@/lib/load-patterns";
+import { maskForAI } from "@/lib/mask";
 import { saveCheck } from "@/lib/save-check";
 import { scoreSignals } from "@/lib/score";
 import { EXAMPLE_OFFER } from "@/lib/fixtures/offers";
@@ -36,8 +37,10 @@ export async function POST(request: Request) {
     return Response.json({ error: validation.error }, { status: 400 });
   }
 
+  // F5: Gemini gets the masked text; the keyword guard keeps the original.
+  // The masked text is never stored or logged either.
   const [extraction, { patterns }] = await Promise.all([
-    extractSignals(validation.text),
+    extractSignals(validation.text, { aiText: maskForAI(validation.text) }),
     loadPatterns(),
   ]);
   const { signals, simulated } = extraction;

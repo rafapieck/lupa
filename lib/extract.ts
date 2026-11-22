@@ -2,6 +2,7 @@ import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { SIGNALS } from "./patterns";
 import type { SimulatedReason } from "./simulated-reason";
 import { GUARDED_SIGNALS, keywordSignals } from "./keywords";
+import { maskForAI } from "./mask";
 import type { Signals } from "./score";
 
 export const DEFAULT_GEMINI_MODEL = "gemini-flash-latest";
@@ -134,16 +135,22 @@ export async function extractSignalsWithGemini(
 /**
  * Extracts signals with Gemini; falls back to keyword rules (simulated: true)
  * when the key is missing or the call fails. Never logs the offer text.
+ *
+ * Week 15 (F5): the keyword guard reads the ORIGINAL text; Gemini only ever
+ * gets `aiText`, the masked text (phones, emails, links, IDs replaced). If a
+ * caller doesn't pass it, the text is masked here, so raw personal data can't
+ * reach the AI by accident.
  */
 export async function extractSignals(
   text: string,
-  options: { timeoutMs?: number } = {},
+  options: { timeoutMs?: number; aiText?: string } = {},
 ): Promise<Extraction> {
   const keywords = keywordSignals(text);
+  const aiText = options.aiText ?? maskForAI(text);
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return { signals: keywords, simulated: true, reason: "missing_key" };
   try {
-    const ai = await extractSignalsWithGemini(text, apiKey, options.timeoutMs);
+    const ai = await extractSignalsWithGemini(aiText, apiKey, options.timeoutMs);
     return { signals: mergeWithGuard(ai, keywords), simulated: false };
   } catch (err) {
     // Only error metadata, never the offer text.

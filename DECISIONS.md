@@ -612,3 +612,40 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 - **A crafted insert with `source = 'tiktok'` is rejected, and an anon `select` on `checks` returns 0 rows.** Both are database rules from the §11 SQL. They were verified on a local Postgres copy in F0, and Rafael ran that SQL in production (M1).
 - Suite: `Test Files  29 passed (29) · Tests  300 passed (300)`. ESLint and `tsc` are clean, and `next build` passes.
 - ✅ F4 criteria pass (M1 is done, so the column exists).
+
+## 2026-11-22 — Week 15 F5: mask personal data before the AI call
+
+### What is masked, and why (Week 15 shadow decision)
+Offers pasted from WhatsApp often include the recruiter's number, the seeker's own email or ID, and short links. Lupa stores none of it, but until now the full text went to Gemini, on the free tier, where Google may use inputs to improve its models (see "Gemini free tier" above). From now on, Gemini only gets a masked copy:
+
+| Found in the offer | Becomes | How it's recognized |
+|---|---|---|
+| Email | `[correo]` | `algo@dominio.tld` |
+| Link | `[liga]` | `http(s)://…`, `www.…`, or a bare domain with a common ending (`bit.ly/…`, `wa.me/…`, `forms.gle/…`, `.com`, `.mx`…). Punctuation right after the link stays. |
+| CURP, INE clave de elector, RFC | `[documento]` | Their official shapes: 18, 18 and 12–13 characters |
+| Phone | `[teléfono]` | A run of digits with spaces, dots, dashes, parentheses or `+` that holds **10–13 digits** (10-digit MX numbers with `+52` and `1`) |
+| Long numbers | `[documento]` | **14+ digits** (CLABE, card, account) |
+
+- **Left alone on purpose:** runs with fewer than 10 digits ("$9,500", "$35,000", "15 min", "Mundial 2026"), and words that are signals by themselves ("WhatsApp", "Gmail", "INE", "deposita").
+- **Order:** emails → links → IDs → phones, so `wa.me/52155…` becomes one `[liga]` and an email's domain isn't also read as a link.
+
+### Where it runs
+- `lib/mask.ts`: `maskForAI()` is a pure function.
+- `/api/check` passes the masked text to `extractSignals(text, { aiText })`. The **keyword guard still reads the original text**, so a link, email or number removed for Gemini still counts as `chat_only_contact`, `generic_email` and so on.
+- If a caller doesn't pass `aiText`, `extractSignals()` masks the text itself, so raw text can't reach Gemini by accident.
+- Validation (type and length) runs before masking, as before. Nothing new is stored or logged; the masked text is only sent to Gemini.
+
+### Checks (PACKET §14a)
+- `lib/mask.test.ts`:
+  - The §14a phones (`55 1234 5678`, `+52 1 55 1234 5678`, `5512345678` and 3 more formats) become `[teléfono]`.
+  - `reclutamiento.mx@gmail.com` becomes `[correo]`.
+  - `https://bit.ly/abc`, `wa.me/5215512345678` and 3 more become `[liga]`.
+  - The invented CURP `GOPK010203MDFRRL09`, a clave de elector, an RFC and an 18-digit CLABE become `[documento]`.
+  - "$500 para tu uniforme", "contratación HOY" and 7 other phrases stay unchanged.
+- **Regression:**
+  - The 5 PACKET test offers get the same verdict before and after masking.
+  - Each offer, with a phone, an email and a link added, gets the same verdict through the AI path. Gemini is mocked to read whatever it's sent, and the test checks that none of the raw data reached it.
+- `route.test.ts`: Gemini gets `[liga]`, `[correo]` and `[teléfono]`, while the result still has `upfront_payment`, `chat_only_contact` and `generic_email` from the guard.
+- Suite: `Test Files  30 passed (30) · Tests  339 passed (339)`. ESLint and `tsc` are clean, and `next build` passes.
+- ✅ F5 criteria pass.
+- **Note:** production still answers "simulated (motivo: auth)" until Rafael renews `GEMINI_API_KEY`. Masking only affects the Gemini path, so it takes effect as soon as the key works.
