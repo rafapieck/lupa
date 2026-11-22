@@ -130,7 +130,7 @@ For B1 the “visual production” role is the product itself: paste the offer �
 | Post reach (what Facebook shows) | 300–800 views | **No Facebook post** (no permission). Fallback: posted to Rafael’s WhatsApp status; nobody replied. Views were not reported. |
 | Checks with `src` tag in 72 h | 5–15 | **0** with `source = wa_status` (no `fb_group` post was made). |
 | Of those, 🔴 or 🟡 | ≥ 50% | Not applicable: 0 checks. |
-| Verdicts shared | 1–3 | Not reported. Comes from the `check_events` query in DECISIONS.md (F7); no number is entered until it’s run. |
+| Verdicts shared | 1–3 | **0 by the audience.** The `shared` events this week are only Rafael’s own F2 tests. |
 | Comments asking “¿esta es real?” | 1–2 | **0.** Nobody replied to the WhatsApp status. |
 | **Keep** | | Counting by source tag: it gave a real zero instead of a guess. |
 | **Change** | | Don’t depend on group admins or Rafael’s personal network. Test with an institutional ally (a job board or an NGO) that job seekers already trust. |
