@@ -696,3 +696,4 @@ The source scan still covers all of `app/`, plus `lib/share.ts` and `lib/cards.t
    - B2 now reads "Chamba en el Mundial 2026: un tipo de oferta de temporada", plus the signals Lupa's own rules find in the invented Mundial test offer.
    - Packet §3d still mentions a May 2026 Policía Cibernética alert as the fallback input for B1. Rafael didn't ask to change it, so it's flagged for him rather than edited.
 - Tests: `Test Files  30 passed (30) · Tests  350 passed (350)` (2 new: card URLs carry the version, and B2 names no source or date).
+- **Packet §3d** (Rafael, 2026-11-22): the B1 fallback no longer cites the unverified "Policía Cibernética CDMX alert of May 2026". It now reads: if no real public offer fits, use an invented test offer labeled "Ejemplo con datos de prueba".
