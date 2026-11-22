@@ -753,3 +753,51 @@ For the §3f "verdicts shared" row:
 select count(*) from public.check_events
  where kind = 'shared' and created_at > now() - interval '7 days';
 ```
+
+## Session log: 2026-11-21 to 2026-11-22 (Week 15 · Distribution)
+
+**Features done:**
+
+| Feature | Commit |
+|---|---|
+| F0 | `9e26d4b` |
+| F1 share card | `680ac69` |
+| Next.js 16.4.6 security upgrade | `de5ed35` |
+| F2 WhatsApp share, deploy #1 | `06a733b` |
+| Reason on the simulated note | `967f56b` |
+| F3 series cards | `af47ae8` |
+| Bold Inter font | `9843d16` |
+| F4 source capture | `cdc0315` |
+| F5 masking | `acdc041` |
+| F6 /contenido, deploy #2 | `6386b16` |
+| Card version + B2 source fix | `b1d3158` |
+| §3d source fix | `c3c5eb3` |
+| F7 evidence | `218e88a` |
+
+All 350 tests pass.
+
+**Decisions and why:**
+- **Share links must match Lupa's own verdict for their ids**, so a link can't upgrade a weak signal.
+- **`proxy.ts` gives real 404s**, because the streamed page can't change its status.
+- **No `?src=` saves `null`, not `direct`**, so that count stays honest.
+- **Masking happens inside `extractSignals`**: the keyword guard reads the original text and Gemini only the masked copy.
+- **Inter Regular and Bold (OFL) are in the repo**, because the built-in font had no bold.
+- **Card URLs carry `v=`**, to get around the 1-day cache.
+- **Only the negated promise line may say "es real".**
+- **Unverified sources were removed** from B2 and §3d.
+
+**What failed or was skipped:**
+- Production Gemini calls fail with **motivo: auth**: the key in Vercel is invalid. Rafael renews it himself. Until then every check is "simulado", and the masking can't be seen in production.
+- I couldn't reach the live site from the sandbox, so production checks were Rafael's, in Safari.
+- Unlinked `[CITED]` figures in packet §1, §2, §8 and §14d were reported to Rafael, not changed.
+- `npm audit` still lists dev-tool advisories (vitest, tinypool, zod); left for a separate decision.
+
+**M-steps:**
+- M1 is done.
+- M2 is done.
+- M3 is pending: run roles 1–6 per asset and fill `docs/content/APPROVALS.md`.
+- M4 is pending: the distribution test, then fill §3f.
+- M5 is pending: the Jorge persona test.
+- Also pending: renew `GEMINI_API_KEY`.
+
+**Tomorrow's first move:** Rafael renews `GEMINI_API_KEY` in Vercel → lupa → Settings → Environment Variables (Production), redeploys, and checks one offer: the gray "simulado" note should be gone. Then he starts M3 on A1.
