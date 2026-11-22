@@ -826,3 +826,14 @@ Rafael reported the results; packet §3f is filled with them as given. No number
   2. The `.xyz` domain looks untrustworthy.
   3. "Mandar aviso" can read as "reportar" (to the police or a platform).
   4. What to do if you already paid.
+
+## 2026-11-22 — Content approvals (M3)
+- `docs/content/APPROVALS.md` has Rafael's three lines, dated 2026-11-22:
+  - **A1:** checked in Safari; the bold and spacing were fixed. Approved before posting on /contenido and his WhatsApp status.
+  - **B1:** checked in Safari and in a chat with himself.
+  - **C1:** checked in Safari; the bold was fixed.
+- **How it was done (stated plainly):**
+  - The six roles in METHOD.md were **not** run as separate chats this week.
+  - Rafael did the evidence and style review himself, in Safari and in the build thread, including removing the unverified B2 source.
+  - APPROVALS.md and METHOD.md both say so; neither presents it as six chats.
+- This closes packet §4 item 9.

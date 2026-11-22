@@ -2,6 +2,8 @@
 
 Six roles, each run in a separate chat, with human approval at the end. Rafael runs them (manual step M3) and saves each chat’s link.
 
+> **Week 15 (2026-11-22):** the six roles were **not** run as separate chats this week. Rafael did the evidence and style review himself, in Safari and in the build thread (including removing the unverified source from the B2 sketch), then approved A1, B1 and C1 in [`APPROVALS.md`](APPROVALS.md).
+
 | # | Role | Input | Output | Quality check |
 |---|---|---|---|---|
 | 1 | **Research** | The pattern row from `fraud_patterns` + its official alert | A 3-line fact sheet with the alert’s link | Rafael opens every link. No link, no fact. |
