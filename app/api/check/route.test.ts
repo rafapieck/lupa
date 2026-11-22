@@ -105,3 +105,30 @@ describe("POST /api/check (Gemini key set but the call fails)", () => {
     expect((await import("./route")).maxDuration).toBe(30);
   });
 });
+
+describe("POST /api/check masks personal data before Gemini (F5)", () => {
+  beforeEach(() => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
+    generateContent.mockReset();
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("Gemini gets [teléfono]/[correo]/[liga]; the keyword guard still sees WhatsApp and Gmail", async () => {
+    // Gemini says "nothing found", so any signal in the result came from the guard on the original text.
+    generateContent.mockResolvedValue({ text: "{}" });
+    const res = await post({
+      text: "Vacante de almacén. Escríbeme por wa.me/5215512345678 o a rh.vacantes@gmail.com, tel 55 1234 5678. Deposita $450.",
+    });
+    const json = await res.json();
+    const sent = generateContent.mock.calls[0][0].contents as string;
+    expect(sent).toContain("[liga]");
+    expect(sent).toContain("[correo]");
+    expect(sent).toContain("[teléfono]");
+    expect(sent).not.toMatch(/5512345678|1234 5678|rh\.vacantes|gmail\.com/);
+    const ids = json.matches.map((m: { id: string }) => m.id);
+    expect(ids).toEqual(expect.arrayContaining(["upfront_payment", "chat_only_contact", "generic_email"]));
+    expect(json.simulated).toBe(false);
+  });
+});
