@@ -837,3 +837,8 @@ Rafael reported the results; packet §3f is filled with them as given. No number
   - Rafael did the evidence and style review himself, in Safari and in the build thread, including removing the unverified B2 source.
   - APPROVALS.md and METHOD.md both say so; neither presents it as six chats.
 - This closes packet §4 item 9.
+
+## 2026-11-22 — Persona test retest: passed
+- Rafael retested in Safari (same offer, live site). The note shows the new "sin IA" wording, with no "simulado" and no reason on screen. Jorge's worst confusion is resolved.
+- The retest and commit `245f1f7` are recorded in `docs/PERSONA_TEST_WEEK15.md`. The persona chat link is still "[TO FILL]": no link was sent.
+- This closes packet §4 item 10. All §4 items are now done.
