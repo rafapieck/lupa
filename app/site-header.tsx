@@ -3,6 +3,7 @@ import Link from "next/link";
 export const NAV = [
   { href: "/", label: "Revisar oferta" },
   { href: "/product", label: "Cómo funciona" },
+  { href: "/contenido", label: "Contenido" },
   { href: "/pricing", label: "Precios" },
   { href: "/about", label: "Nosotros" },
 ] as const;
