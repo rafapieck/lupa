@@ -585,3 +585,30 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 
   All are under 150 KB. A new test renders the 3-long-signal OG image and checks that it's 1200×630 and under 150 KB.
 - With Inter Bold, three long signals filled the OG image to its edges, so the 3-signal text size went from 42 to 38 px.
+
+## 2026-11-22 — Week 15 F4: count checks by source
+
+### What shipped
+- `lib/source.ts`: the fixed list `fb_group`, `wa_status`, `wa_share`, `contenido`, `direct`, the same as the §11 `checks.source` constraint.
+  - `toSource()` accepts only an exact match.
+  - `captureSource()` and `readSource()` handle `sessionStorage` (key `lupa_src`). Storage errors are swallowed.
+- `app/source-capture.tsx` sits in the root layout, so `?src=` is read on **any** page. It renders nothing and never shows the value.
+- `check-form.tsx` sends `source: readSource()` with each check.
+- `/api/check` passes `source` to `saveCheck()`. `toCheckRow()` validates it again against the same list on the server: anything else is saved as `null`, and the check works the same.
+
+### Decisions
+- **Within one visit, the last valid tag wins.** An invalid `?src=` later in the visit doesn't erase a valid one.
+- **No `?src=` means `null`, not `direct`.** `direct` is only saved when a link carries `?src=direct`, so a null count stays honest ("we don't know") instead of being guessed.
+- **What we read back is validated again**, both in the browser and on the server, so a value someone planted in `sessionStorage` can't reach the database.
+- Nothing new about the person is stored: one value from the fixed list, or null.
+
+### Checks (PACKET §14c)
+- **Open `/?src=fb_group`, then check an offer → `source = 'fb_group'`.**
+  - `route-save.test.ts` checks that all 5 valid tags save as given, and that `<script>`, `tiktok`, `FB_GROUP`, a number and null save as `null` with a normal 200 answer.
+  - A real browser on a local production build stored `fb_group`, browsed to `/product` and back, and sent `source: "fb_group"` with the check.
+- **Open `/?src=<script>` → ignored, saved as `null`.**
+  - `lib/source.test.ts` covers this.
+  - In the browser nothing was stored, the page HTML didn't contain the value, and the check sent `source: null`.
+- **A crafted insert with `source = 'tiktok'` is rejected, and an anon `select` on `checks` returns 0 rows.** Both are database rules from the §11 SQL. They were verified on a local Postgres copy in F0, and Rafael ran that SQL in production (M1).
+- Suite: `Test Files  29 passed (29) · Tests  300 passed (300)`. ESLint and `tsc` are clean, and `next build` passes.
+- ✅ F4 criteria pass (M1 is done, so the column exists).

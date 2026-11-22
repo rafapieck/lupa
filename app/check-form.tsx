@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { EXAMPLE_OFFER as SAMPLE_OFFER } from "@/lib/fixtures/offers";
 import { hasCheckedBefore, markChecked } from "@/lib/send-event";
+import { readSource } from "@/lib/source";
 import { MAX_CHARS, validateOffer } from "@/lib/validate";
 import ResultView, { type CheckResult } from "./result-view";
 
@@ -33,7 +34,7 @@ export default function CheckForm() {
       const res = await fetch("/api/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: validation.text, repeatVisit: hasCheckedBefore() }),
+        body: JSON.stringify({ text: validation.text, repeatVisit: hasCheckedBefore(), source: readSource() }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.verdict) {
