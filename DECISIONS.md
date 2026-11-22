@@ -685,3 +685,14 @@ The source scan still covers all of `app/`, plus `lib/share.ts` and `lib/cards.t
 - Suite: `Test Files  30 passed (30) · Tests  348 passed (348)`. ESLint and `tsc` are clean, and `next build` passes (`/contenido` is static).
 - On a local production server at 390px: `scrollWidth` 390 (no horizontal scroll), all three images load with status 200, the header wraps onto two lines cleanly, and the home page's `<meta name="description">` is the new line.
 - ✅ F6 criteria pass.
+
+## 2026-11-22 — Fixes after Rafael's /contenido review
+1. **A1 and C1 showed the old look** (no bold, wider letter spacing, small footer), while B1 looked right.
+   - **Cause:** `/api/card` answers `Cache-Control: public, max-age=86400`, so Safari and the CDN kept the PNGs from before Inter Bold (9843d16) for up to a day. B1 had no cached copy yet.
+   - **Fix:** `CARD_VERSION = "2"` in `lib/cards.ts`. `/contenido` now embeds `…&v=2`, a new URL with no old copy. `/api/card` ignores unknown params. Bump the version whenever a card's look changes.
+   - **Production check:** I can't reach the live site from the build sandbox. But B1 is drawn with the same `cardFonts()` loader, and Rafael saw it bold, so the fonts load in production; only the cached copies were old.
+2. **B2 cited an unverified source.**
+   - "señaló la SSC CDMX en mayo de 2026" was removed from `/contenido` and from packet §3c.
+   - B2 now reads "Chamba en el Mundial 2026: un tipo de oferta de temporada", plus the signals Lupa's own rules find in the invented Mundial test offer.
+   - Packet §3d still mentions a May 2026 Policía Cibernética alert as the fallback input for B1. Rafael didn't ask to change it, so it's flagged for him rather than edited.
+- Tests: `Test Files  30 passed (30) · Tests  350 passed (350)` (2 new: card URLs carry the version, and B2 names no source or date).

@@ -89,7 +89,7 @@ In a feed full of synthetic “tips” and fake recruiters, one more scary post 
 | Series | Purpose | Concept 1 (status) | Concept 2 (status) | Format |
 |---|---|---|---|---|
 | **A · Señal de la semana** | Teach one fraud signal at a time, with its source | **A1 “Te piden dinero antes de contratarte”** (pattern `upfront_payment`, Policía Cibernética CDMX). **FINISHED** | A2 “Te piden tu INE por WhatsApp” (`personal_documents`, Guardia Nacional). Sketch: headline only | Square 1080×1080 PNG (Facebook group post) |
-| **B · La revisé con Lupa** | Show the method: real input → verdict | **B1 the shared verdict card** from one real offer (section 3d). **FINISHED** | B2 “Chamba en el Mundial 2026”: a seasonal offer type flagged by SSC CDMX in May 2026. Sketch: headline + which patterns it would hit | Link preview 1200×630 (WhatsApp / Facebook) |
+| **B · La revisé con Lupa** | Show the method: real input → verdict | **B1 the shared verdict card** from one real offer (section 3d). **FINISHED** | B2 “Chamba en el Mundial 2026”: a seasonal offer type. Sketch: headline + which patterns it would hit | Link preview 1200×630 (WhatsApp / Facebook) |
 | **C · Antes de depositar** | A pause the person can use without Lupa | **C1 “3 cosas antes de depositar”**: 1) ¿te piden dinero antes de contratarte? 2) ¿la empresa tiene dirección y RFC? 3) pega la oferta en Lupa. **FINISHED** | C2 “Qué contestarle al reclutador”: reuses the `reply_es` lines that already exist. Sketch: headline + one reply | Vertical 1080×1920 PNG (WhatsApp status) |
 
 Three finished assets (A1, B1, C1) across three formats. A2, B2 and C2 stay as purposeful sketches in `docs/content/CONCEPTS.md`.
