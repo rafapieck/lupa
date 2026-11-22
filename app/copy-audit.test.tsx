@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_SAFE_TIP, VERDICT_LABELS, scoreSignals } from "@/lib/score";
 import { OFFER_4 } from "@/lib/fixtures/offers";
 import { keywordSignals } from "@/lib/keywords";
-import ResultView, { GREEN_DETAILS_TITLE } from "./result-view";
+import ResultView, { GREEN_DETAILS_TITLE, SIMULATED_NOTE } from "./result-view";
 import { LOCAL_PATTERNS } from "@/lib/patterns";
 import { CARD_FOOTER, SERIES_A, SERIES_C } from "@/lib/cards";
 import { OG_FOOTER, OG_LABEL, SHARE_CTA, SHARE_NOTE, WA_BUTTON, WA_NOTE, sharePath, whatsappMessage } from "@/lib/share";
@@ -116,5 +116,20 @@ describe("copy audit: Week 15 shared and content surfaces (PACKET §14e)", () =>
       expect(msg).not.toMatch(FORBIDDEN);
     }
     expect([WA_BUTTON, WA_NOTE, SHARE_CTA, SHARE_NOTE].join(" ")).not.toMatch(FORBIDDEN);
+  });
+});
+
+describe("copy audit: the no-AI note (persona test Week 15, Jorge)", () => {
+  it("never shows 'simulado' or the error reason on screen", () => {
+    const result = scoreSignals(keywordSignals(OFFER_4));
+    for (const r of [{ ...result, verdict: "red" as const }, result]) {
+      const html = renderToStaticMarkup(
+        <ResultView result={{ ...r, simulated: true, simulatedReason: "auth" }} isExample={false} onReset={() => {}} />,
+      );
+      const visible = html.replace(/<[^>]*>/g, " ");
+      expect(visible).toContain(SIMULATED_NOTE);
+      expect(visible).not.toMatch(/simulad|motivo|\bauth\b|quota|timeout/i);
+      expect(visible).not.toMatch(FORBIDDEN);
+    }
   });
 });

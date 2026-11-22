@@ -13,11 +13,15 @@ export type CheckResult = ScoreResult & {
   simulatedReason?: SimulatedReason;
 };
 
-/** "(motivo: quota)" for a known category; anything else shows nothing. */
-export function reasonLabel(reason: unknown): string {
+/**
+ * The fallback reason for diagnosis only (Week 15 persona test, Jorge):
+ * never shown on screen, only as a data- attribute. Unknown values → null,
+ * so nothing outside the fixed list is ever echoed.
+ */
+export function reasonAttr(reason: unknown): SimulatedReason | null {
   return typeof reason === "string" && (SIMULATED_REASONS as readonly string[]).includes(reason)
-    ? ` (motivo: ${reason})`
-    : "";
+    ? (reason as SimulatedReason)
+    : null;
 }
 
 const THEME: Record<Verdict, { band: string; circle: string; icon: string; title: string }> = {
@@ -26,8 +30,11 @@ const THEME: Record<Verdict, { band: string; circle: string; icon: string; title
   green: { band: "bg-green-500", circle: "bg-green-700", icon: "text-green-700", title: "text-green-800" },
 };
 
+// Persona test Week 15 (Jorge): "simulado" read as "falso" and "auth" was
+// jargon, so he doubted the red verdict. Still says honestly that no AI was
+// used this time, without either word.
 export const SIMULATED_NOTE =
-  "ℹ️ La IA no respondió esta vez (análisis de IA simulado). El resultado viene de nuestras señales de alerta oficiales, que funcionan igual.";
+  "Esta vez la revisión se hizo sin IA, solo con nuestras señales de alerta oficiales. El resultado siempre lo deciden estas señales.";
 
 // A green verdict can still carry low-weight matches (score 1–2). Calling them
 // "señales de alerta encontradas" under the green label
@@ -109,9 +116,13 @@ export default function ResultView({
           // Required label for simulated AI output. Kept small and below the
           // advice: the verdict itself always comes from the rules, so it must
           // not read as "fake result" (persona test, confusion #1).
-          <p role="status" className="px-1 text-sm leading-snug text-gray-500">
+          <p
+            role="status"
+            data-testid="no-ai-note"
+            data-simulated-reason={reasonAttr(result.simulatedReason) ?? undefined}
+            className="px-1 text-sm leading-snug text-gray-500"
+          >
             {SIMULATED_NOTE}
-            {reasonLabel(result.simulatedReason)}
           </p>
         )}
 
