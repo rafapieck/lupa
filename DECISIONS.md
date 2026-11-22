@@ -467,3 +467,34 @@ Full record: `docs/PERSONA_TEST_WEEK14.md`. She would not pay $24,000 today: not
 - Changed: `next` and `eslint-config-next` pinned to `16.4.6` (package.json + package-lock.json). No code changes.
 - Checks: `Test Files  25 passed (25) · Tests  221 passed (221)`; ESLint and `tsc` clean; `next build` passes with no security notice. A local production smoke test returned 200 for `/`, `/pricing`, the share card and its OG image, and 404 for `/s/green/…` and `/s/red/fake_id`. `npm audit` no longer lists `next`.
 - Not changed: `npm audit` still reports advisories in dev and test tooling (vitest, tinypool, minimatch, zod via the eslint chain). They don't ship to the site, and fixing some of them needs breaking upgrades. They're left for a separate decision.
+
+## 2026-11-22 — Week 15 F2: share verdict to WhatsApp (deploy #1)
+
+### What shipped
+- On 🔴/🟡 results, a full-width green button **"Mandar aviso por WhatsApp"** sits right under "Qué hacer ahora", with the gray line "No mandamos el texto de la oferta, solo las señales." under it (`app/share-whatsapp.tsx`).
+- The button is a link to `https://wa.me/?text=<encoded>` that opens in a new tab. The message is fixed: "Revisé una oferta de trabajo en Lupa y tiene señales de fraude. Mira cuáles antes de pagar: https://www.lupaempleo.xyz/s/<verdict>/<ids>".
+- Tapping it sends one anonymous `shared` event per result through `/api/event`. `validateEvent()` now accepts `kind: "shared"` with no answer and rejects it with an answer, matching the §11 constraint that Rafael applied in M1.
+
+### Decisions
+- **The link is built only from the result's matched pattern ids** (strongest first, max 6) and checked with the same `parseShare()` the card page uses (`shareLinkFor()`). If a result couldn't produce a valid card, for example a pattern that exists only in the database, the button is hidden instead of sending a link that opens a 404.
+- **The link always uses `https://www.lupaempleo.xyz`**, even on preview deploys, so a forwarded link always points to the public site.
+- **Not shown on green** (`shareLinkFor` returns null) and **not shown on the example offer** (`isExample`).
+- **If the check wasn't saved** (no check id), the button still works but no event is sent, the same rule as the existing events.
+- The event fires on tap, before WhatsApp opens. We can count taps, not messages actually sent: WhatsApp doesn't report back.
+
+### Checks
+- Tests: `app/share-whatsapp.test.tsx`:
+  - 🔴 shows the button, opens wa.me in a new tab with the exact message, and fires `shared` exactly once over two taps.
+  - 🟡 shows it.
+  - 🟢 and the example offer don't.
+  - No check id means no event.
+  - Every built link passes `parseShare`.
+  - The message is only the fixed text plus the link: no 12-character piece of any test offer, and no digits, `$` or `@`.
+- `route.test.ts` covers `shared` with and without an answer.
+- Suite: `Test Files  26 passed (26) · Tests  231 passed (231)`. ESLint and `tsc` are clean. `next build` (16.4.6) passes.
+- Local production run at 390px:
+  - A red check showed the button with a valid `/s/red/...` link, `scrollWidth` 390.
+  - A green check showed no button.
+  - `POST /api/event {kind:"shared"}` → 200; with an answer → 400.
+- M1 (Rafael, 2026-11-21): the §11 SQL ran with "Success. No rows returned", so `shared` events save in production.
+- ✅ F2 criteria pass.
